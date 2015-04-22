@@ -1,0 +1,92 @@
+% extends 'base.html'
+
+% block content
+    % from 'macros.html' import dot, byte_format, uptime_format
+    % if conclusions is defined and conclusions
+    % with (sumres, collections) = conclusions
+        % for (colres, collection, sensors) in collections
+            <h3 class="text-centered">{{ collection.name if collection else the_non_collection }}</h3>
+            <table class="table-simple table-hovered">
+                <caption>
+                    % if collection
+                        {{ collection.description if collection.description else dot() }}
+                    % else
+                        {{ the_non_collection }}
+                    % endif
+                </caption>
+                <thead>
+                    <tr>
+                        <th class="width-20 text-left lower"><var>sensor</var></th>
+                        <th class="width-20 text-centered"><var>unit</var></th>
+                        <th class="width-20 text-centered"></th>
+                        <th class="width-20 text-centered"></th>
+                        <td class="width-20 text-right"></td>
+                    </tr>
+                </thead>
+                <tbody>
+                % for (sensres, sensor) in sensors
+                    <tr>
+                        <th class="width-20 text-left"
+                        % if sensor.description
+                            data-tools="tooltip" title="{{ sensor.description }}"
+                        % endif
+                        >{{ sensor.name }}</th>
+                        <td class="width-20 text-centered"
+                        % if sensor.unit and sensor.unit.description
+                            data-tools="tooltip" title="{{ sensor.unit.description }}"
+                        % endif
+                        >
+                            <em>
+                                {{ sensor.unit.name if sensor.unit else dot() }}
+                            </em>
+                        </td>
+                        % with last = sensor.get_data().first()
+                        <td class="width-20 text-centered"
+                            % if sensor.unit and sensor.unit.axis
+                                data-tools="tooltip" title="{{ the_axis[sensor.unit.axis]|default('nix') }}"
+                            % endif
+                        >
+                            % if sensor.unit and sensor.unit.axis
+                                <var class="{{ 'error' if sensor.factor and not sensres }}">
+                                % if last and last.value
+                                    % if sensor.unit.axis == 2:
+                                        {{ byte_format(last.value) }}
+                                    % elif sensor.unit.axis == 3:
+                                        {{ uptime_format(last.value) }}
+                                    % else
+                                        {{ last.value }}
+                                    % endif
+                                % else
+                                    {{ dot() }}
+                                % endif
+                                </var>
+                            % else
+                                <var>{{ dot() }}</var>
+                            % endif
+                        </td>
+                        <td class="width-20 text-centered"
+                        % if sensres and last and last.value
+                            data-tools="tooltip" title="{{ last.value }}"
+                        % endif
+                        >{{ sensor.factor if sensor.factor else dot() }}</td>
+                        % endwith
+                        <td class="width-20 text-right">{{ (sensres ~ '%') if sensres else dot() }}</td>
+                    </tr>
+                % endfor
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="width-20 text-left"></td>
+                        <td class="width-20 text-centered"></td>
+                        <td class="width-20 text-centered"></td>
+                        <td class="width-20 text-centered"></td>
+                        <td class="width-20 text-right">
+                            {{ colres }}%
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        % endfor
+    % endwith
+    % endif
+% endblock content

@@ -1,0 +1,57 @@
+% macro dot()
+    &bull;
+% endmacro
+
+% macro render_conc_url()
+    % with guess = range(0, 99)|random
+        <span class="conc"><a href="{{ url_for('conc', cc=guess) }}">{{ guess }}%</a></span>
+        % if caller
+        {{ caller(guess, url_for('conc')) }}
+        % endif
+    % endwith
+% endmacro
+
+% macro byte_format(bt)
+    % if bt
+    <span class="byte_{{ bt }}">{{ bt }}</span>
+    <script>
+        $('.byte_{{ bt }}').text(byte_fmt({{ bt }}));
+    </script>
+    % endif
+% endmacro
+
+% macro time_format(ms)
+    % if ms
+    <span class="time_{{ ms }}">{{ ms }}</span>
+    <script>
+        $('.time_{{ ms }}').text(time_fmt({{ ms }}));
+    </script>
+    % endif
+% endmacro
+
+% macro uptime_format(ms)
+    % if ms
+    <span class="uptime_{{ ms }}">{{ ms }}</span>
+    <script>
+        $('.uptime_{{ ms }}').text(uptime_fmt({{ ms }}));
+    </script>
+    % endif
+% endmacro
+
+% macro render_shout_form(form)
+    % if form is defined and form
+    <div class="units-row">
+        <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">
+            {{ form.csrf_token() }}
+            <div class="input-groups width-100 pause">
+                <span class="text-centered">{{ form.shout.label }}</span>
+                % for error in form.errors.shout
+                <span class="error">{{ error }}</span>
+                % endfor
+                {{ form.shout(placeholder='schreib was!') }}
+            </div>
+            {{ form.save(class='btn right') }}
+        </form>
+    </div>
+    % endif
+% endmacro

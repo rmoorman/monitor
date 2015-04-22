@@ -1,0 +1,243 @@
+% extends 'base.html'
+
+% block header
+    <script src="{{ url_for('static', filename='js/jquery.flot.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.flot.crosshair.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.flot.resize.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.flot.time.min.js') }}"></script>
+    <script>
+    $(function ()
+    {
+        function black_or_white (color)
+        {
+            var rgb = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+            return (0.2126 * rgb[1] + 0.7152 * rgb[2] + 0.0722 * rgb[3]) < 150 ? 'black' : 'white';
+        }
+
+        var plot;
+        var plot_data = {
+            crosshair: {
+                mode: 'x'
+            },
+            grid: {
+                hoverable: true,
+                clickable: true
+            },
+            legend: {
+                show: true,
+                container: $('#legend_phony'),
+                sorted: true,
+                labelFormatter: function (label, series)
+                {
+                    $('#legend_elems').append($('<div/>',
+                    {
+                        class: 'width-100 label label-' + black_or_white(series.color),
+                        css: {'background-color': series.color},
+                        id: 'legend_elems_'+label,
+                        text: label
+                    }));
+                }
+            },
+            series: {
+                shadowSize: 0,
+                lines: {show: true},
+                points: {show: true}
+            },
+            xaxis: {
+                mode: 'time',
+                timeformat: '%d.%m - %H:%M',
+                timezone: 'browser',
+                tickFormatter: function (value, axis)
+                {
+                    return time_fmt(value);
+                }
+            },
+            yaxes: [
+                {}, // 1: numbers
+                {
+                    tickFormatter: function (value, axis)
+                    {
+                        return byte_fmt(value);
+                    }
+                }, // 2: bytes
+                {
+                    mode: "time",
+                    timezone: "browser",
+                    tickFormatter: function (value, axis)
+                    {
+                        return uptime_fmt(value);
+                    }
+                } // 3: seconds
+            ]
+        }
+
+        function redraw(data)
+        {
+            $('#plot').resize(function ()
+            {
+                $('#legend_elems').text('');
+            });
+            $('#legend_elems').text('');
+            $('#plot').removeClass('hide');
+
+            $('#plot').bind('plotclick plothover', function (event, pos, item)
+            {
+
+                if (pos !== undefined && pos !== null)
+                {
+                    $.each(plot.getData(), function (i, dset)
+                    {
+                        var last = $(dset.data.filter(function(idx){ return idx[0] <= pos.x; })).first()[0];
+                        if (last !== undefined && last !== null)
+                        {
+                            // console.log(last);
+                        }
+                    });
+                }
+
+            });
+
+            plot = $.plot('#plot', data, plot_data);
+        }
+
+        function draw(source)
+        {
+            $('#source_elems_'+source).parent().siblings().each(function (i, se)
+            {
+                $(se).removeClass('active');
+            });
+            $('#source_elems_'+source).parent().addClass('active');
+            api_query('/api/graph/'+source, redraw);
+        }
+
+        function load()
+        {
+
+            $.getJSON('/api/graph', function (sources)
+            {
+                if (sources !== undefined && sources !== null)
+                {
+                    $('#source_elems').text('');
+                    $.each(sources, function (i, source)
+                    {
+
+                        function pdraw (cl)
+                        {
+
+                            draw(source);
+
+                        }
+
+                        $('#source_elems').append(
+                            $('<li/>').append(
+                                $('<a/>', {
+                                    id: 'source_elems_'+source,
+                                    text: source
+                                }).on('click', pdraw)
+                            )
+                        );
+
+                        var display = parseInt($(location).attr('hash').replace('#', ''), 10);
+
+                        if (i == (display ? (display % sources.length) : 0))
+                        {
+                            pdraw()
+                        }
+                    });
+                }
+            });
+        }
+
+        load();
+
+    });
+    </script>
+    <style>
+        #plot {
+            height: 250px;
+        }
+    </style>
+
+    <script>
+    $(function ()
+    {
+
+        function reload(shouts)
+        {
+            $('#shouts').text('');
+            $.each(shouts, function (i, shout)
+            {
+                var block = ((i % 2) != 0) ? $('#block_'+(i - 1)) : $('<ul/>',
+                {
+                    id: 'block_'+i,
+                    class: 'blocks-2'
+                });
+
+                block.append($('<li/>').append($('<div/>',
+                {
+                    class: 'group'
+                }).append($('<big/>',
+                {
+                    id: 'delete_'+i,
+                    class: 'left error hide',
+                    title: 'delete',
+                    text: '✂',
+                }).on('click', function (cl)
+                {
+                    api_query('/api/data/{{ the_shouts }}', load, 'DELETE', {
+                        time: shout.time,
+                        value: shout.value
+                    }, function(ex, err)
+                    {
+                        $('#toggle_'+i).addClass('error');
+                        $('#toggle_'+i).text(err);
+                        $('#delete_'+i).fadeOut('slow');
+                    });
+                })).append($('<blockquote/>',
+                {
+                    class: 'end',
+                    text: shout.value
+                })).append($('<span/>',
+                {
+                    id: 'toggle_'+i,
+                    class: 'small left',
+                    text: moment(shout.time).fromNow()
+                }).on('click', function (cl)
+                {
+                    $('#delete_'+i).fadeIn('fast');
+                }))));
+
+                $('#shouts').append(block);
+
+            });
+        }
+
+        function load()
+        {
+            api_query('/api/data/{{ the_shouts }}', reload);
+        }
+        load();
+    });
+    </script>
+% endblock header
+
+
+% block content
+    % from 'macros.html' import render_shout_form
+    <div class="units-row end">
+        <span class="hide" id="legend_phony"></span>
+        <nav class="nav-tabs">
+            <ul id="source_elems"></ul>
+        </nav>
+        <div class="unit-100 hide" id="plot"></div>
+        <div class="unit-100">
+            <div id="legend_elems"></div>
+        </div>
+    </div>
+
+    <div class="units-row units-padding end">
+        <div class="unit-100" id="shouts">no shouts</div>
+    </div>
+
+    {{ render_shout_form(shout_form) }}
+% endblock content

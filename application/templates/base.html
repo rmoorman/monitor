@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>{{ title ~ ' | ' if title }}monitor</title>
+    <link href="{{ url_for('logo') }}" rel="shortcut icon">
+    <link href="{{ url_for('static', filename='css/kube.min.css') }}" rel="stylesheet" />
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kube.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/moment-with-locales.min.js') }}"></script>
+    <script>moment.locale('de');</script>
+    <script>
+        function byte_fmt (bytes)
+        {
+            var units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+            if(bytes === 0){ return '0 Bit'; }
+            var i = parseInt(Math.floor(Math.log(bytes)/Math.log(1024)), 10);
+            return Math.round(bytes/Math.pow(1024, i), 2) + ' ' + units[i];
+        }
+
+        function time_fmt (seconds)
+        {
+            return moment(seconds).format('DD.MM - HH:mm');
+        };
+
+        function uptime_fmt (seconds)
+        {
+            return moment.duration(seconds, 'seconds').humanize();
+        };
+
+        function api_query (endpoint, callb, method, data, errorcallb)
+        {
+            method = (method ? method : 'GET');
+            $('#loader').removeClass('hide');
+            function cb (cd)
+            {
+                if (cd !== null && cd !== undefined)
+                {
+                    $('#loader').addClass('hide');
+                    return callb(cd)
+                }
+            }
+            function ecb (ex, err)
+            {
+                $('#loader').text(err);
+                $('#loader').removeClass('hide');
+            }
+
+            $.ajax({
+                url: endpoint,
+                type: method,
+                data: data,
+                error: (errorcallb ? errorcallb : ecb),
+                success: cb
+            });
+        }
+    </script>
+    % block header
+    % endblock header
+    <style>
+        #logo {
+            max-height: 100px;
+        }
+    </style>
+</head>
+<body class="units-padding">
+
+% from 'macros.html' import dot, render_conc_url
+
+<header class="units-row end">
+    <div class="unit-100 unit-centered">
+        <a href="{{ url_for('index') }}" class="left">
+            <img id="logo" src="{{ url_for('logo') }}" alt="big awesome company icon logo comic sans" />
+        </a>
+        <nav class="navbar navbar-right">
+            <ul>
+                % with messages = get_flashed_messages()
+                % for message in messages
+                    <li>{{ message }}</li>
+                    % if not loop.last
+                    <li class="error">{{ dot() }}</li>
+                    % endif
+                % endfor
+                % endwith
+                <li><var id="loader" class="hide">{{ dot() }}</var></li>
+                <li><a href="{{ url_for('api') }}">api</a></li>
+                <li>
+                    <h1>
+                    % call(guess, guessurl) render_conc_url()
+                        <script>
+                            function changeconc (data)
+                            {
+                                $('.conc').html($('<a/>', {
+                                    class: 'conc',
+                                    href: '{{ guessurl }}'.replace('%25', data + '%'),
+                                    text: data + '%'
+                                }));
+                            };
+                            api_query('{{ guessurl }}'.replace('%25', 'api/{{ guess }}%'), changeconc);
+                        </script>
+                    % endcall
+                    </h1>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+
+<div class="units-row end">
+    <div class="unit-100 unit-centered">
+        % block content
+        % endblock content
+    </div>
+</div>
+
+<footer class="units-row end">
+    % from 'macros.html' import dot, render_conc_url
+    <div class="unit-100 unit-centered">
+        <div class="text-centered">
+            % if error
+                sorry
+            % else
+                {{ render_conc_url() }}
+            % endif
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

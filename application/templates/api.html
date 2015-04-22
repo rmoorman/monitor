@@ -1,0 +1,281 @@
+% extends 'base.html'
+
+% block content
+    % from 'macros.html' import dot
+    % macro _name_desc_fields(tab)
+        <span class="bold">{{ tab }}</span> wird durch <span class="light">name</span> identifiziert, mittels <span class="light">description</span> textuell kurz näher beschrieben
+    % endmacro
+    % macro _calc_sec(sec)
+        {{ sec }} Sekunden
+    % endmacro
+    % macro _axis_num()
+        % for (an, ad) in the_axis.items()
+            {{ an }} &rarr; <span class="italic">{{ ad }}</span>{{ ';' if not loop.last }}
+        % endfor
+    % endmacro
+
+    <div class="unit-75 unit-centered">
+        <div class="pause">
+            Die REST-API dieser Anwendung reicht das Datenbankschema und dessen Denkweise ungeschönt durch.
+        </div>
+        <h2 class="text-centered">datenbank</h2>
+        <div class="text-centered pause">
+            Die Tabellen: <span class="bold">Data</span>, <span class="bold">Sensor</span>, <span class="bold">Unit</span> und <span class="bold">Collection</span>.
+        </div>
+        <div>
+            In <span class="bold">Data</span> werden die Felder <span class="light">value</span> und <span class="light">time</span> gespeichert - die eigentlichen Daten..
+        </div>
+        <div>
+            Die Zeit wird von der api automatisch gesetzt; Zeiten sind immer in <span class="italic">utc</span>).
+        </div>
+        <div>
+            Wete, die älter als " <span class="italic">jetzt</span> minus {{ _calc_sec(the_maxkeep) }}" sind, werden vor jedem neuen Schreibvorgang gelöscht.
+        </div>
+        <div class="pause">
+            Ein Eintrag in <span class="bold">Data</span> braucht einen <span class="bold">Sensor</span>, welcher (einmalig) vorher erstellt werden muss.
+        </div>
+        <div>
+            Der {{ _name_desc_fields('Sensor') }} und definiert den <span class="light">factor</span> der in der Berechnung des Status unter z.B. <a href="{{ url_for('conc', cc=42) }}">23%</a> verwendet wird (Es fließen nur Werte der letzten {{ _calc_sec(the_maxconc) }} mit in die Berechnung ein).
+        </div>
+        <div class="pause">
+            Ein <span class="bold">Sensor</span> braucht wiederum eine <span class="bold">Unit</span> welche ggf. vorher erstellt werden muss.
+        </div>
+        <div>
+            Eine {{ _name_desc_fields('Unit') }} und definiert die <span class="light">axis</span> auf der im Graph gezeichnet wird.
+        </div>
+        <div class="pause">
+            Die Achsen sind durchnummeriert:
+            {{ _axis_num() }}
+        </div>
+        <div class="pause">
+            Eine {{ _name_desc_fields('Collection') }} - Mehrere Einträge von <span class="bold">Sensor</span> können in <span class="bold">Collection</span> zusammengefasst werden, oder landen im Graph unter "<span class="italic">{{ the_non_collection }}</span>".
+        </div>
+        <figure class="pause">
+            <img src="{{ url_for('static', filename='db.png') }}" alt="datenbank" />
+            <figcaption>
+                Um das Bild schlank zu halten wurden die Felder <span class="light">name</span> und <span class="light">description</span> für die Tabellen <span class="bold">Sensor</span>, <span class="bold">Unit</span> und <span class="bold">Collection</span> (alle, bis auf <span class="bold">Data</span>) nicht eingezeichnet.
+            </figcaption>
+        </figure>
+        <div class="pause">
+            Die Nachrichten auf der Startseite liegen als <span class="light">value</span> unter <span class="bold">Data</span>, gebunden an den <span class="bold">Sensor</span> mit dem Namen <span class="italic">{{ the_shouts }}</span> (<span class="light">factor</span> &rarr; 0.0); die <span class="bold">Unit</span> heißt ebenfalls <span class="italic">{{ the_shouts }}</span> (<span class="light">axis</span> &rarr; 0); keine <span class="bold">Collection</span> (landet also unter "<span class="italic">{{ the_non_collection }}</span>").
+        </div>
+    </div>
+
+    % macro _endpoint(tail, param=[])
+        <code>{{ url_for('api') }}/{{ tail }}</code>
+        % for (p, v) in param
+            <code><span class="bold">{{ p }}</span> = <span class="italic">{{ v }}</span></code>
+        % endfor
+    % endmacro
+
+    <div class="unit-100 unit-centered">
+        <h2 class="text-centered">api</h2>
+        <blockquote class="width-75 unit-centered">
+            "... das Passwort liegt bestimmt irgendwo im Wiki&trade;, musst halt mal nachschauen ..."
+        </blockquote>
+        <table class="table-simple table-hovered">
+            <caption>endpoints</caption>
+            <thead>
+            <tr>
+                <th class="text-centered width-10"></th>
+                <th class="text-centered width-20">holt übersicht</th>
+                <th class="text-centered width-20">holt details zu *_xyz</th>
+                <th class="text-centered width-50">schreibt daten zu *_xyz</th>
+            <tr>
+            </thead>
+            <tbody>
+            </tr>
+                <th class="text-left">axis</th>
+                <td class="text-centered">
+                    {{ _endpoint('axis') }}
+                </td>
+                <td class="text-centered">
+                    {{ dot() }}
+                </td>
+                <td class="text-centered">
+                    {{ dot() }}
+                </td>
+            </tr>
+            <tr>
+                <th class="text-left">unit</th>
+                <td class="text-centered">
+                    {{ _endpoint('unit') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint('unit/unit_xyz') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint(
+                        'unit',
+                        param=[('name', 'unit_xyz'), ('axis', 1), ('description', '"unit_xyz description"')]
+                    ) }}
+                </td>
+            </tr>
+            <tr>
+                <th class="text-left">collection</th>
+                <td class="text-centered">
+                    {{ _endpoint('collection') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint('collection/collection_xyz') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint(
+                        'collection',
+                        param=[('name', 'collection_xyz'), ('sensors', 'sensor_xyz'), ('sensors', 'sensor_yzx'), ('sensors', 'sensor_zxy'), ('description', '"collection_xyz description"')]
+                    ) }}
+                </td>
+            </tr>
+            <tr>
+                <th class="text-left">sensor</th>
+                <td class="text-centered">
+                    {{ _endpoint('sensor') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint('data/sensor_xyz') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint(
+                        'sensor',
+                        param=[('name', 'sensor_xyz'), ('unit', 'unit_xyz'), ('factor', 0.42), ('description', '"sensor_xyz description"')]
+                    ) }}
+                </td>
+            </tr>
+            <tr>
+                <th class="text-left">data</th>
+                <td class="text-centered">
+                    {{ dot() }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint('data/sensor_xyz') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint(
+                        'data',
+                        param=[('name', 'sensor_xyz'), ('value', 0.23)]
+                    ) }}
+                </td>
+            </tr>
+            <tr>
+                <th class="text-left">graph</th>
+                <td class="text-centered">
+                    {{ _endpoint('graph') }}
+                </td>
+                <td class="text-centered">
+                    {{ _endpoint('graph/collection_xyz') }}
+                </td>
+                <td class="text-centered">
+                    {{ dot() }}
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="text-centered upper"></td>
+                    <td class="text-centered upper">get</td>
+                    <td class="text-centered upper">get</td>
+                    <td class="text-centered upper">post</td>
+                <tr>
+            </tfoot>
+        </table>
+    </div>
+
+    % macro _hartmann(var=False)
+<pre><code class="width-100 pause">#!/bin/bash
+
+{{ 'ERDSTRAHLEN=$(' if caller }}python3 -c "from random import choice; print(choice(range(0, 1337)))"{{ ')' if caller }}
+{{ caller() if caller }}</code></pre>
+    % endmacro
+
+    % macro _curl(tail, param=[], npc=false)
+{% if not npc %}<pre><code class="width-100 pause">{% endif %}curl {{ '-u "user:pass" -X POST' if param else '-X GET'}} {{ url_for('api', _external=true) }}/{{ tail }}{% for (p, v) in param %} \
+ -d {{ p }}={{ v }}{% endfor %}{% if not npc %}</code></pre>{% endif %}
+    % endmacro
+
+    % macro _check_fields(lst, name)
+        In der <span class="bold">{{ lst }}</span>-Liste sollte nun ein Eintrag Namens <span class="italic">{{ name }}</span> enthalten sein:
+        {{ _curl(lst) }}
+        So kommt man so an die Details:
+        {{ _curl(lst ~ '/' ~ name) }}
+    % endmacro
+
+    <div class="unit-75 unit-centered">
+        <h2 class="text-centered">Erdstrahlen</h2>
+        <div class="pause">
+            Im vorliegendem Beispielfall haben wir eine Datenquelle, die kontinuierlich die Erdstrahlenbelastung vor Ort misst:
+        </div>
+        {{ _hartmann() }}
+
+        <h3>Unit & Axis</h3>
+        <div class="pause">
+            Als erstes wird ermittelt in welchem Wertebereich die Datenquelle Ergebnisse liefert (<span class="italic">0 &rarr; 1337</span>), und auf welcher <span class="light">axis</span> diese dargestellt werden sollen (<span class="italic">&rarr; 1</span>):
+            {{ _curl('axis') }}
+            {{ _axis_num() }}
+        </div>
+
+        <div class="pause">
+            Eine neue <span class="bold">unit</span> für Erdstrahlenbelastung wird so erstellt:
+            {{ _curl(
+                'unit',
+                param=[('name', 'bovis'), ('axis', 1), ('description', '"Erdstrahlenbelastung in Bovis"')]
+            )}}
+            {{ _check_fields('unit', 'bovis') }}
+        </div>
+
+        <h3>Sensor</h3>
+        <div class="pause">
+            Nun kann man einen <span class="bold">sensor</span> anlegen. Als <span class="light">factor</span> wird <span class="italic">0.0</span> gewählt, um diesen Sensor aus der Berechnung auszuschließen:
+            {{ _curl(
+                'sensor',
+                param=[('name', 'erdstrahlen'), ('unit', 'bovis'), ('factor', 0.0), ('description', '"Kontinuierliche Belastung durch Einwirkung von Erdstrahlen"')]
+            )}}
+            {{ _check_fields('sensor', 'erdstrahlen') }}
+        </div>
+
+        <h3>Collection</h3>
+        <div class="pause">
+            Damit der <span class="bold">sensor</span> <span class="italic">bovis</span> nicht alleine ist, werfen wir diesen in eine <span class="bold">collection</span>:
+            {{ _curl(
+                'collection',
+                param=[('name', 'gefahrenzone'), ('sensors', 'erdstrahlen'), ('description', '"Vom Leben auf der Kante"')]
+            )}}
+
+            {{ _check_fields('collection', 'gefahrenzone')}}
+        </div>
+
+        <h3>Data</h3>
+        <div class="pause">
+            Das Script das nun regelmäßig läuft sieht also jetzt so aus:
+            % call _hartmann(true)
+{{ _curl(
+    'data',
+    param=[('sensor', 'erdstrahlen'), ('value', '$ERDSTRAHLEN')],
+    npc=true
+)}}
+            % endcall
+
+            So kommt man so an alle Messpunkte:
+            {{ _curl('data/erdstrahlen') }}
+        </div>
+
+        <h3>Shouts</h3>
+        <div class="pause">
+            Bei bestimmten Ereignissen kann eine Nachricht hinterlassen werden. Das Script dazu würde z.B. so ausehen:
+            % call _hartmann(true)
+{{ _curl(
+    'data',
+    param=[('sensor', 'erdstrahlen'), ('value', '$ERDSTRAHLEN')],
+    npc=true
+)}}
+if [ "$ERDSTRAHLEN" == 1337 ]; then
+    {{ _curl(
+    'data',
+    param=[('sensor', 'shouts'), ('value', '"Erdstrahlen auf Maximum\! Sofort Evakuieren\!\!1\!"')],
+    npc=true
+)}}
+fi
+            % endcall
+        </div>
+    Dies funktioniert natürlich erst, nachdem der <span class="bold">sensor</span> sowie die <span class="bold">unit</span> <span class="italic">{{ the_shouts }}</span> erstellt wurden <span class="small">(... oder schon was auf der <a href="{{ url_for('index') }}">Startseite</a> geschrieben wurde)</span>.
+    </div>
+% endblock content
