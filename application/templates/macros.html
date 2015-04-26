@@ -2,13 +2,15 @@
     &bull;
 % endmacro
 
-% macro render_conc_url()
-    % with guess = range(0, 99)|random
-        <span class="conc"><a href="{{ url_for('conc', cc=guess) }}">{{ guess }}%</a></span>
-        % if caller
-        {{ caller(guess, url_for('conc')) }}
-        % endif
-    % endwith
+% macro set_conc(conc=None)
+    <span class="conc">
+        % with guess = conc[0] if conc else range(0, 99)|random
+        <a href="{{ url_for('conc') }}">{{ guess }}%</a>
+        % endwith
+    </span>
+    % if caller
+    {{ caller(url_for('conc')) }}
+    % endif
 % endmacro
 
 % macro byte_format(bt)
@@ -25,6 +27,15 @@
     <span class="time_{{ ms }}">{{ ms }}</span>
     <script>
         $('.time_{{ ms }}').text(time_fmt({{ ms }}));
+    </script>
+    % endif
+% endmacro
+
+% macro reltime_format(ms)
+    % if ms
+    <span class="reltime_{{ ms }}">{{ ms }}</span>
+    <script>
+        $('.reltime_{{ ms }}').text(reltime_fmt({{ ms }}));
     </script>
     % endif
 % endmacro

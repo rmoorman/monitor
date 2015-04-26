@@ -20,13 +20,23 @@
 
         function time_fmt (seconds)
         {
-            return moment(seconds).format('DD.MM - HH:mm');
+            return moment(seconds).format('DD.MM - HH:mm:ss');
+        };
+
+        function reltime_fmt (seconds)
+        {
+            return moment(seconds).fromNow();
         };
 
         function uptime_fmt (seconds)
         {
             return moment.duration(seconds, 'seconds').humanize();
         };
+
+        function refresh_seconds ()
+        {
+            return Math.floor(Math.random() * ({{ the_autoref_max }} - {{ the_autoref_min }}) + {{ the_autoref_min }});
+        }
 
         function api_query (endpoint, callb, method, data, errorcallb)
         {
@@ -40,9 +50,9 @@
                     return callb(cd)
                 }
             }
-            function ecb (ex, err)
+            function ecb (ex, err, exp)
             {
-                $('#loader').text(err);
+                $('#loader').text(err + ' - (' + exp + ')');
                 $('#loader').removeClass('hide');
             }
 
@@ -59,13 +69,13 @@
     % endblock header
     <style>
         #logo {
-            max-height: 100px;
+            max-height: 125px;
         }
     </style>
 </head>
 <body class="units-padding">
 
-% from 'macros.html' import dot, render_conc_url
+% from 'macros.html' import dot, set_conc
 
 <header class="units-row end">
     <div class="unit-100 unit-centered">
@@ -82,25 +92,10 @@
                     % endif
                 % endfor
                 % endwith
-                <li><var id="loader" class="hide">{{ dot() }}</var></li>
+                <li><var id="loader" class="hide">{{ dot() }}</var>&nbsp;</li>
+                <li><span class="time">&mdash;</span></li>
                 <li><a href="{{ url_for('api') }}">api</a></li>
-                <li>
-                    <h1>
-                    % call(guess, guessurl) render_conc_url()
-                        <script>
-                            function changeconc (data)
-                            {
-                                $('.conc').html($('<a/>', {
-                                    class: 'conc',
-                                    href: '{{ guessurl }}'.replace('%25', data + '%'),
-                                    text: data + '%'
-                                }));
-                            };
-                            api_query('{{ guessurl }}'.replace('%25', 'api/{{ guess }}%'), changeconc);
-                        </script>
-                    % endcall
-                    </h1>
-                </li>
+                <li class="big"><h1>{{ set_conc(conclusions) }}</h1></li>
             </ul>
         </nav>
     </div>
@@ -115,15 +110,60 @@
 </div>
 
 <footer class="units-row end">
-    % from 'macros.html' import dot, render_conc_url
-    <div class="unit-100 unit-centered">
-        <div class="text-centered">
-            % if error
-                sorry
-            % else
-                {{ render_conc_url() }}
-            % endif
-        </div>
+    % from 'macros.html' import dot, set_conc
+    <div class="unit-33 text-centered">
+        &mdash;
+    </div>
+    <div class="unit-33 text-centered">
+        % if error
+            <div class="bold">sorry</div>
+        % endif
+            % call(hurl) set_conc(conclusions)
+                <script>
+                    var timer = null;
+                    var title = $(document).prop('title');
+                    % if conclusions and (conclusions[0] ~ '%') == title
+                    title = title.replace('{{ conclusions[0] }}%', '%%%');
+                    % endif
+
+                    function load()
+                    {
+
+                        function set_conc(val)
+                        {
+                            $('.conc').html($('<a/>',
+                            {
+                                href: '{{ hurl }}'.replace('%25', val + '%'),
+                                text: val + '%'
+                            }).on('hover', function (hv)
+                            {
+                                $.progress.update(val);
+                            }));
+                            $.progress.hide();
+
+                            $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
+                        }
+
+                        api_query('{{ url_for('api') }}/%', set_conc);
+                        clearInterval(timer);
+                        timer = setInterval(function()
+                        {
+                            load();
+                        }, refresh_seconds());
+                    }
+
+                    load();
+                </script>
+            % endcall
+    </div>
+    <div class="unit-33 text-centered">
+        <span class="time">&mdash;</span>
+        <script>
+            setInterval(function()
+            {
+                $('.time').text(time_fmt(new Date()));
+            }, 250)
+        </script>
     </div>
 </footer>
 

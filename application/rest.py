@@ -3,8 +3,15 @@ from flask.ext.restful.reqparse import RequestParser
 
 from application import api, db
 from application.auth import requires_auth
-from application.models import Unit, Collection, Sensor, Data
-from application.service import sanitize_name, retrieve_dbo, the_non_collection, the_axis, short_conclusions, handle_variation
+from application.models import Collection, Data, Sensor, Unit
+from application.service import (
+    handle_variation,
+    retrieve_dbo,
+    sanitize_name,
+    short_conclusions,
+    the_axis,
+    the_non_collection
+)
 
 parser = RequestParser()
 parser.add_argument('axis', type=int)
@@ -46,7 +53,7 @@ class AxisHandler(Resource):
 class ConcHandler(Resource):
     def get(self, cc=0.0):
         conclusions = short_conclusions()
-        if cc != conclusions:
+        if cc and cc != conclusions:
             handle_variation(cc, conclusions)
         return conclusions
 
@@ -136,12 +143,14 @@ class DataHandler(Resource):
     @requires_auth
     def delete(self, sensorname=None):
         a = _get_input(['value', 'time'])
-        data = Data.query.filter(Data.value == a.get('value')).first()
+        data = Data.query.filter(Data.value == a.get('value')).all()
         if not data:
             abort(400, error='given value is unknown', value=a.get('value'))
-        if str(data.ms()) != a.get('time'):
-            abort(400, error='given time does not match', time=a.get('time'), expected=str(data.ms()))
-        db.session.delete(data)
+        # there can be multiple data with the same value
+        if not any([d for d in data if str(d.ms()) == a.get('time')]):
+            abort(400, error='given time does not match', time=a.get('time'))
+        for dt in [d for d in data if str(d.ms()) == a.get('time')]:
+            db.session.delete(dt)
         db.session.commit()
 
         return a
@@ -149,17 +158,15 @@ class DataHandler(Resource):
 
 class GraphHandler(Resource):
     def get(self, collectionname=None):
-        # from time import sleep
+        non_collection = None
         if collectionname:
-            # sleep(2)
-            collection = None if collectionname == the_non_collection else retrieve_dbo(Collection, collectionname)
+            collection = non_collection if collectionname == the_non_collection else retrieve_dbo(Collection, collectionname)
             return [
                 sensor.flot_repr() for sensor in Sensor.query.filter(Sensor.collection == collection).order_by(Sensor.name.asc()).all()
                 if sensor and sensor.unit and sensor.unit.axis in the_axis.keys()
             ]
-        # sleep(2)
-        res = [c.name for c in Collection.query.order_by(Collection.name.asc()).all()]
-        return res + the_non_collection if Sensor.query.filter(Sensor.collection is None).count() else res
+        res = [c.name for c in Collection.query.order_by(Collection.name.asc()).all() if c.sensors.count() and any([s.unit.axis for s in c.sensors.all()])]
+        return res + [the_non_collection] if Sensor.query.filter(Sensor.collection == non_collection).count() else res
 
 
 api.add_resource(AxisHandler, '/axis', '/axis/')

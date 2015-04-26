@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from flask import flash
-from flask.ext.restful import abort
 from string import ascii_letters, digits
 
+from flask import flash
+from flask.ext.restful import abort
+
 from application import app, db
-from application.models import Unit, Sensor, Data, Collection
+from application.models import Collection, Data, Sensor, Unit
 
 the_axis = {
     1: 'plain numbers',
@@ -15,6 +16,7 @@ the_non_collection = 'etc'
 the_service_collection = 'service'
 the_shouts = 'shouts'
 the_variation = 'erdstrahlen'
+the_variation_unit = 'bovis'
 
 app.jinja_env.line_statement_prefix = '%'
 app.jinja_env.line_comment_prefix = '###'
@@ -22,7 +24,9 @@ app.jinja_env.line_comment_prefix = '###'
 
 def sanitize_name(mstr):
     if mstr:
-        return ''.join([c for c in mstr if c in (ascii_letters + digits + '-._')]).lower()
+        res = ''.join([c for c in mstr if c in (ascii_letters + digits + '-._')]).lower()
+        print('mstr:', mstr, 'res:', res)
+        return res
 
 
 def retrieve_dbo(mdl, name, create=False):
@@ -38,6 +42,14 @@ def retrieve_dbo(mdl, name, create=False):
 
 def _cliff():
     return (datetime.utcnow() - timedelta(seconds=app.config['MAXCONC']))
+
+
+def the_cliff():
+    return int(1000 * (datetime.utcnow() - datetime.utcfromtimestamp(app.config['MAXCONC'])).total_seconds())
+
+
+def the_del_cliff():
+    return int(1000 * (datetime.utcnow() - datetime.utcfromtimestamp(app.config['MAXKEEP'])).total_seconds())
 
 
 def _ccnv(stf, fac):
@@ -120,13 +132,13 @@ def handle_shout(form):
 
 
 def handle_variation(given, expected):
-    unit = retrieve_dbo(Unit, the_variation, create=True)
-    unit.description = 'Erdstrahlenberechnung im Hartmann-Gitter'
+    unit = retrieve_dbo(Unit, the_variation_unit, create=True)
+    unit.description = 'Erdstrahlenbelastung in Bovis'
     unit.axis = 1
     db.session.add(unit)
 
     sensor = retrieve_dbo(Sensor, the_variation, create=unit)
-    sensor.description = 'Erdstrahlenbelastung in Bovis'
+    sensor.description = 'Erdstrahlenberechnung im Hartmann-Gitter'
     sensor.factor = 0.0
     db.session.add(sensor)
 
@@ -138,7 +150,14 @@ def handle_variation(given, expected):
     flash('{}: {}'.format(the_variation, vr))
     db.session.commit()
 
-app.jinja_env.globals.update(conc=short_conclusions)
+
+app.jinja_env.globals.update(the_autoref_max=1000*app.config['AUTOREF_MAX'])
+app.jinja_env.globals.update(the_autoref_min=1000*app.config['AUTOREF_MIN'])
 app.jinja_env.globals.update(the_axis=the_axis)
+app.jinja_env.globals.update(the_cliff=the_cliff)
+app.jinja_env.globals.update(the_del_cliff=the_del_cliff)
 app.jinja_env.globals.update(the_non_collection=the_non_collection)
+app.jinja_env.globals.update(the_service_collection=the_service_collection)
 app.jinja_env.globals.update(the_shouts=the_shouts)
+app.jinja_env.globals.update(the_variation=the_variation)
+app.jinja_env.globals.update(the_variation_unit=the_variation_unit)

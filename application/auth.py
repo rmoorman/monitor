@@ -1,6 +1,7 @@
-from flask import request, Response
 from functools import wraps
 from random import choice
+
+from flask import Response, request
 
 from application import app
 

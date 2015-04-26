@@ -1,7 +1,7 @@
+from json import dumps, loads
 from os import getenv, mkdir, path
 from random import choice
 from string import ascii_lowercase, digits
-from json import loads, dumps
 
 
 def _rand():
@@ -55,3 +55,6 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///' + DATABASE
 
 MAXKEEP = 60 * 60 * 24 * 14
 MAXCONC = 60 * 60 * 2
+
+AUTOREF_MIN = 15
+AUTOREF_MAX = 30

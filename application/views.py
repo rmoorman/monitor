@@ -1,9 +1,14 @@
-from flask import render_template, request, send_from_directory
 from random import choice
+
+from flask import render_template, request, send_from_directory
 
 from application import app
 from application.forms import ShoutForm
-from application.service import handle_shout, handle_variation, jump_to_conclusions_mat
+from application.service import (
+    handle_shout,
+    handle_variation,
+    jump_to_conclusions_mat
+)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -28,7 +33,7 @@ def index():
 def conc(cc=0.0):
     conclusions = jump_to_conclusions_mat()
 
-    if cc != conclusions[0]:
+    if cc and cc != conclusions[0]:
         handle_variation(cc, conclusions[0])
 
     return render_template(
@@ -50,11 +55,12 @@ def api():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def page_error(error):
+    print(request.endpoint)
     return render_template(
         'error.html',
         title='kaputt',
         error=error
-    )
+    ), error.code
 
 
 @app.route('/favicon.ico')

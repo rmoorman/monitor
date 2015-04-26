@@ -70,82 +70,98 @@
                 } // 3: seconds
             ]
         }
-
-        function redraw(data)
-        {
-            $('#plot').resize(function ()
-            {
-                $('#legend_elems').text('');
-            });
-            $('#legend_elems').text('');
-            $('#plot').removeClass('hide');
-
-            $('#plot').bind('plotclick plothover', function (event, pos, item)
-            {
-
-                if (pos !== undefined && pos !== null)
-                {
-                    $.each(plot.getData(), function (i, dset)
-                    {
-                        var last = $(dset.data.filter(function(idx){ return idx[0] <= pos.x; })).first()[0];
-                        if (last !== undefined && last !== null)
-                        {
-                            // console.log(last);
-                        }
-                    });
-                }
-
-            });
-
-            plot = $.plot('#plot', data, plot_data);
-        }
-
-        function draw(source)
-        {
-            $('#source_elems_'+source).parent().siblings().each(function (i, se)
-            {
-                $(se).removeClass('active');
-            });
-            $('#source_elems_'+source).parent().addClass('active');
-            api_query('/api/graph/'+source, redraw);
-        }
+        var timer;
 
         function load()
         {
-
-            $.getJSON('/api/graph', function (sources)
+            function draw(source)
             {
-                if (sources !== undefined && sources !== null)
+                function redraw(data)
                 {
-                    $('#source_elems').text('');
-                    $.each(sources, function (i, source)
+                    $('#plot').removeClass('hide');
+                    $('#legend').removeClass('hide');
+
+                    $('#plot').resize(function ()
                     {
+                        $('#legend_elems').text('');
+                    });
+                    $('#legend_elems').text('');
 
-                        function pdraw (cl)
+                    $('#plot').bind('plotclick plothover', function (event, pos, item)
+                    {
+                        if (pos !== undefined && pos !== null)
                         {
-
-                            draw(source);
-
-                        }
-
-                        $('#source_elems').append(
-                            $('<li/>').append(
-                                $('<a/>', {
-                                    id: 'source_elems_'+source,
-                                    text: source
-                                }).on('click', pdraw)
-                            )
-                        );
-
-                        var display = parseInt($(location).attr('hash').replace('#', ''), 10);
-
-                        if (i == (display ? (display % sources.length) : 0))
-                        {
-                            pdraw()
+                            $.each(plot.getData(), function (i, dset)
+                            {
+                                var label = null;
+                                var value = null;
+                                var last = $(dset.data.filter(function(idx){ return idx[0] <= pos.x; })).first()[0];
+                                if (last !== undefined && last !== null)
+                                {
+                                    label = time_fmt(pos.x);
+                                    value = last[1];
+                                    switch (dset.yaxis.n)
+                                    {
+                                        case 2: value = byte_fmt(value) + ' [' + value + ']'; break;
+                                        case 3: value = uptime_fmt(value) + ' [' + value + ']'; break;
+                                        default: break;
+                                    }
+                                }
+                                if (value !== null && value !== null)
+                                {
+                                    $('#legend_elems_'+dset.label).text(dset.label + ' (' + value + ' - ' + label + ')');
+                                }
+                            });
                         }
                     });
+                    plot = $.plot('#plot', data, plot_data);
                 }
-            });
+
+                $('#source_elems_'+source).parent().siblings().each(function (i, se)
+                {
+                    $(se).removeClass('active');
+                });
+                $('#source_elems_'+source).parent().addClass('active');
+
+                clearInterval(timer);
+                timer = setInterval(function() {
+                    draw(source);
+                }, refresh_seconds());
+
+                api_query('{{ url_for('api') }}/graph/'+source, redraw);
+            }
+
+            function reload(sources)
+            {
+
+                $('#source_elems').text('');
+                $('#sources').removeClass('hide');
+
+                $.each(sources, function (i, source)
+                {
+                    $('#source_elems').append(
+                        $('<li/>').append(
+                            $('<a/>', {
+                                id: 'source_elems_'+source,
+                                text: source
+                            }).on('click', function (cl)
+                            {
+                                draw(source);
+                            })
+                        )
+                    );
+
+                    var display = parseInt($(location).attr('hash').replace('#', ''), 10);
+                    display = (display ? (display % sources.length) : 0);
+
+                    if (i == display)
+                    {
+                        draw(source);
+                    }
+                });
+            }
+
+            api_query('{{ url_for('api') }}/graph', reload)
         }
 
         load();
@@ -161,61 +177,70 @@
     <script>
     $(function ()
     {
-
-        function reload(shouts)
-        {
-            $('#shouts').text('');
-            $.each(shouts, function (i, shout)
-            {
-                var block = ((i % 2) != 0) ? $('#block_'+(i - 1)) : $('<ul/>',
-                {
-                    id: 'block_'+i,
-                    class: 'blocks-2'
-                });
-
-                block.append($('<li/>').append($('<div/>',
-                {
-                    class: 'group'
-                }).append($('<big/>',
-                {
-                    id: 'delete_'+i,
-                    class: 'left error hide',
-                    title: 'delete',
-                    text: '✂',
-                }).on('click', function (cl)
-                {
-                    api_query('/api/data/{{ the_shouts }}', load, 'DELETE', {
-                        time: shout.time,
-                        value: shout.value
-                    }, function(ex, err)
-                    {
-                        $('#toggle_'+i).addClass('error');
-                        $('#toggle_'+i).text(err);
-                        $('#delete_'+i).fadeOut('slow');
-                    });
-                })).append($('<blockquote/>',
-                {
-                    class: 'end',
-                    text: shout.value
-                })).append($('<span/>',
-                {
-                    id: 'toggle_'+i,
-                    class: 'small left',
-                    text: moment(shout.time).fromNow()
-                }).on('click', function (cl)
-                {
-                    $('#delete_'+i).fadeIn('fast');
-                }))));
-
-                $('#shouts').append(block);
-
-            });
-        }
+        var timer;
+        var wdh = 3;
 
         function load()
         {
-            api_query('/api/data/{{ the_shouts }}', reload);
+            function reload(shouts)
+            {
+                $('#shouts').text('');
+                $('#shouts').removeClass('hide');
+
+                $.each(shouts, function (i, shout)
+                {
+                    var elem = (i - (i % wdh));
+                    var block = ((i % wdh) != 0) ? $('#block_'+elem) : $('<ul/>',
+                    {
+                        id: 'block_'+elem,
+                        class: 'blocks-'+wdh
+                    });
+
+                    block.append($('<li/>').append($('<div/>',
+                    {
+                        class: 'group'
+                    }).on('click', function (cl)
+                    {
+                        $('#delete_'+i).fadeIn('fast');
+                    }).append($('<big/>',
+                    {
+                        id: 'delete_'+i,
+                        class: 'left error hide',
+                        title: 'delete',
+                        text: '✗',
+                    }).on('click', function (cl)
+                    {
+                        api_query('{{ url_for('api') }}/data/{{ the_shouts }}', load, 'DELETE', {
+                            time: shout.time,
+                            value: shout.value
+                        }, function(ex, err, eex)
+                        {
+                            $('#toggle_'+i).addClass('error');
+                            $('#toggle_'+i).text(err + ' - ' + eex);
+                            $('#delete_'+i).fadeOut('slow');
+                        });
+                    })).append($('<blockquote/>',
+                    {
+                        class: 'end',
+                        text: shout.value
+                    })).append($('<span/>',
+                    {
+                        id: 'toggle_'+i,
+                        class: 'small left',
+                        text: reltime_fmt(shout.time)
+                    }))));
+
+                    $('#shouts').append(block);
+                });
+            }
+
+            api_query('{{ url_for('api') }}/data/{{ the_shouts }}', reload);
+            clearInterval(timer);
+            timer = setInterval(function() {
+                load();
+            }, refresh_seconds());
         }
+
         load();
     });
     </script>
@@ -225,18 +250,18 @@
 % block content
     % from 'macros.html' import render_shout_form
     <div class="units-row end">
-        <span class="hide" id="legend_phony"></span>
-        <nav class="nav-tabs">
+        <nav class="nav-tabs hide" id="sources">
             <ul id="source_elems"></ul>
         </nav>
         <div class="unit-100 hide" id="plot"></div>
-        <div class="unit-100">
+        <div class="unit-100 hide" id="legend">
             <div id="legend_elems"></div>
+            <span class="hide" id="legend_phony"></span>
         </div>
     </div>
 
     <div class="units-row units-padding end">
-        <div class="unit-100" id="shouts">no shouts</div>
+        <div class="unit-100 hide" id="shouts"></div>
     </div>
 
     {{ render_shout_form(shout_form) }}

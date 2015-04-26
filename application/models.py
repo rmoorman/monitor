@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from sqlalchemy.ext.declarative import declared_attr
 
 from application import app, db

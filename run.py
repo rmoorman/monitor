@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from application import app, db
+# from application import app, db
 from application.startup import init_app
 
-init_app(app, db)
+app = init_app()
 
 if __name__ == '__main__':
     app.run(
