@@ -12,6 +12,7 @@ from application.service import (
     the_axis,
     the_non_collection
 )
+from application.space import spaceapi
 
 parser = RequestParser()
 parser.add_argument('axis', type=int)
@@ -56,6 +57,11 @@ class ConcHandler(Resource):
         if cc and cc != conclusions:
             handle_variation(cc, conclusions)
         return conclusions
+
+
+class SpaceHandler(Resource):
+    def get(self):
+        return spaceapi()
 
 
 class UnitHandler(Resource):
@@ -170,9 +176,10 @@ class GraphHandler(Resource):
 
 
 api.add_resource(AxisHandler, '/axis', '/axis/')
-api.add_resource(ConcHandler, '/%', '/%/', '/<int:cc>%', '/<float:cc>%')
-api.add_resource(UnitHandler, '/unit', '/unit/', '/unit/<string:name>')
 api.add_resource(CollectionHandler, '/collection', '/collection/', '/collection/<string:name>')
-api.add_resource(SensorHandler, '/sensor', '/sensor/', '/sensor/<string:name>')
+api.add_resource(ConcHandler, '/%', '/%/', '/<int:cc>%', '/<float:cc>%')
 api.add_resource(DataHandler, '/data', '/data/', '/data/<string:sensorname>')
 api.add_resource(GraphHandler, '/graph', '/graph/', '/graph/<string:collectionname>')
+api.add_resource(SensorHandler, '/sensor', '/sensor/', '/sensor/<string:name>')
+api.add_resource(SpaceHandler, '/space', '/space/', '/SpaceAPI', '/SpaceAPI/')
+api.add_resource(UnitHandler, '/unit', '/unit/', '/unit/<string:name>')

@@ -1,0 +1,78 @@
+{
+    "api": "0.13",
+    "space": "CommonGround",
+    "logo":  "",
+    "url": "https://www.cccmz.de/",
+        "location": {
+        "lat": 50.083181,
+        "lon": 8.229363,
+        "address": "Sedanplatz 7. 65183 Wiesbaden"
+    },
+    "state": {
+        "open": null,
+        "lastchange": 0,
+        "message": "",
+        "icon": {
+            "open": "",
+            "closed": ""
+        }
+    },
+    "contact": {
+        "issue_mail": "YWRtaW5AY2NjbXouZGUK",
+        "twitter": "@cccmz",
+        "irc": "irc://hackint.eu/#cccmz",
+        "jabber": "cccmz@conference.jabber.ccc.de",
+        "email": "kontakt@cccmz.de"
+    },
+    "issue_report_channels": [
+        "twitter",
+        "issue_mail"
+    ],
+    "sensors": {
+        "door_locked": [
+            {
+                "description": "",
+                "name": "",
+                "value": true
+            }
+        ],
+        "network_connections": [
+            {
+                "description": "",
+                "name": "",
+                "value": 0
+            }
+        ],
+        "power_consumption": [
+            {
+                "description": "",
+                "name": "",
+                "unit": "W",
+                "value": 0
+            }
+        ]
+    },
+    "feeds": {
+        "blog": {
+            "url": "https://www.cccmz.de/feed/",
+            "type": "rss"
+        },
+        "calendar": {
+            "url": "https://www.cccmz.de/feed/my-calendar-ics",
+            "type": "ical"
+        }
+    },
+    "cache": {
+        "schedule": "m.05"
+    },
+    "projects": [
+        "https://fnord.cccmz.de/",
+        "https://github.com/cccmzwi/",
+        "https://git.cccmz.de/"
+    ],
+    "open": null,
+    "icon": {
+        "open": "",
+        "closed": ""
+    }
+}

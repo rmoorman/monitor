@@ -24,9 +24,7 @@ app.jinja_env.line_comment_prefix = '###'
 
 def sanitize_name(mstr):
     if mstr:
-        res = ''.join([c for c in mstr if c in (ascii_letters + digits + '-._')]).lower()
-        print('mstr:', mstr, 'res:', res)
-        return res
+        return ''.join([c for c in mstr if c in (ascii_letters + digits + '-._')]).lower()
 
 
 def retrieve_dbo(mdl, name, create=False):

@@ -106,10 +106,14 @@ class Data(BaseModel, db.Model):
     def ms(self):
         return int(1000 * (self.time - datetime.utcfromtimestamp(0)).total_seconds())
 
+    def num(self, fallback=True):
+        try:
+            return float(self.value)
+        except ValueError:
+            return self.value if fallback else None
+
     def api_repr(self):
-        res = self.show()
-        res.update(time=self.ms())
-        return res
+        return dict(time=self.ms(), value=self.num())
 
     def flot_repr(self):
         return [self.ms(), self.value]
