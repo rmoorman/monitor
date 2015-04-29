@@ -90,6 +90,8 @@ echo $ERDSTRAHLEN
                     '###Status', '<a href="' ~ url_for('conc') ~ '">Status</a>'
                 )|replace(
                     '###Graph', '<a href="' ~ url_for('index', _anchor=range(0, 10)|random) ~ '">Graph</a>'
+                )|replace(
+                    '###' ~ the_shouts , '<a href="' ~ url_for('index', _anchor=the_shouts) ~ '">' ~ the_shouts ~ '</a>'
                 )|safe|replace(
                     '###cliff', cliff
                 )|replace(
@@ -131,25 +133,27 @@ echo $ERDSTRAHLEN
             ('axis', 'GET', none, 'Übersicht'),
         ]
     )
-        <div class="units-row end">
-            <div class="unit-50">
+        <ul class="blocks-2">
+            <li>
                 {{ _listing([
                     'Die ###Axis einer ###Unit bestimmt auf welcher y-Achse ###Data eines ###Sensors im ###Graph angezeigt und deren Werte formatiert werden.'
                 ]) }}
-            </div>
-            <table class="table-flat table-hovered unit-50">
-                <tr>
-                    <th class="width-50 text-centered">Achse</th>
-                    <th class="width-50 text-centered">Formatierung</th>
-                </tr>
-                % for a in the_axis
-                <tr>
-                    <td class="width-50 text-centered">{{ a }}</td>
-                    <td class="width-50 text-centered">{{ the_axis[a] }}</td>
-                </tr>
-                % endfor
-            </table>
-        </div>
+            </li>
+            <li>
+                <table class="table-flat table-hovered width-50 unit-centered">
+                    <tr>
+                        <th class="width-50 text-centered">Achse</th>
+                        <th class="width-50 text-centered">Formatierung</th>
+                    </tr>
+                    % for a in the_axis
+                    <tr>
+                        <td class="width-50 text-centered">{{ a }}</td>
+                        <td class="width-50 text-centered">{{ the_axis[a] }}</td>
+                    </tr>
+                    % endfor
+                </table>
+            </li>
+        </ul>
     % endcall
 
     % call _segment(
@@ -168,6 +172,7 @@ echo $ERDSTRAHLEN
         {{ _listing([
             'Ohne ###Sensor kann nicht nach ###Data geschrieben werden.',
             'Ein ###Sensor existiert immer in Abhängigkeit zu einer ###Unit.',
+            'Mehrere ###Sensoren können in ###Collections gruppiert werden.',
             'Der ###svarfactor###evar bestimmt die Gewichtung des letzten Werts im ###Status. Möchte man die Werte davon ausschließen wählt man hier den Wert ###svar0.0###evar.'
         ]) }}
     % endcall
@@ -259,12 +264,12 @@ echo $ERDSTRAHLEN
     % endwith
 
     % call _segment(
-        the_shouts ~ ' & ' ~ the_variation,
+        the_shouts,
         []
     )
         {{ _listing([
-            'ABC',
-            'DEF',
+            'Bei den "###' ~ the_shouts ~ '" handelt es sich um die Nachrichten unterhalb vom ###Graph.',
+            'Der ###Sensor hat den Namen ###svar' ~ the_shouts ~ '###evar, mit der ###Unit ###svar' ~ the_shouts ~ '###evar, und liegt in der ###Collection ###svar' ~ the_service_collection ~ '###evar.',
         ]) }}
     % endcall
 
@@ -278,6 +283,18 @@ if [ $ERDSTRAHLEN -eq 1337 ]; then
         ],
         pre=true
     ) }}fi
+    % endcall
+
+    % call _segment(
+        the_variation,
+        []
+    )
+        {{ _listing([
+            'Bei den "' ~ the_variation ~ '" handelt es sich nicht um das oben beschriebene Script.',
+            'Es ist die Differenz der aufgerufenen URL vom ###Status zum tatsächlichen Wert des ###Status. Auf der Seite sowie in der API.',
+            'Beim Expliziten Aufruf der URL ###svar' ~ url_for('conc', cc=0) ~ '%###evar bzw. ###svar' ~ url_for('conc')|replace('%25', '') ~ '%###evar wird das ganze übersprungen.',
+            'Der ###Sensor hat den Namen ###svar' ~ the_variation ~ '###evar, mit der ###Unit ###svar' ~ the_variation_unit ~ '###evar, und liegt in der ###Collection ###svar' ~ the_service_collection ~ '###evar.',
+        ]) }}
     % endcall
 
     <hr />

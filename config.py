@@ -64,7 +64,7 @@ SPACE_LOGO = 'cccmz_logo.png'
 SPACE_OPEN = 'space_open.png'
 SPACE_CLOSED = 'space_closed.png'
 SPACE_SENSORS = {
-    'network_connections': ['traffic4out'],
-    'power_consumption': ['leases'],
-    'door_locked': ['traffic4in', 'traffic6out']
+    'network_connections': ['leases'],
+    'power_consumption': ['flukso'],
+    'door_locked': ['glassdoor', 'backdoor']
 }

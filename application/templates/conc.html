@@ -4,7 +4,7 @@
     % macro _collection_progress(name, prc)
         % if name
         <script>
-            $('#conc_{{ name }}').on('hover', function (hv){
+            $('#conc_{{ name }}').hover(function (hv){
                 $.progress.update({{ prc }});
             });
         </script>

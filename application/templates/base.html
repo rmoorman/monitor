@@ -13,7 +13,7 @@
         function byte_fmt (bytes)
         {
             var units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
-            if(bytes === 0){ return '0 Bit'; }
+            if(bytes === 0 || bytes == 0){ return '0 Bit'; }
             var i = parseInt(Math.floor(Math.log(bytes)/Math.log(1024)), 10);
             return Math.round(bytes/Math.pow(1024, i), 2) + ' ' + units[i];
         }
@@ -69,7 +69,7 @@
     % endblock header
     <style>
         #logo {
-            max-height: 125px;
+            max-height: 150px;
         }
     </style>
 </head>
@@ -115,46 +115,44 @@
         &mdash;
     </div>
     <div class="unit-33 text-centered">
-        % if error
-            <div class="bold">sorry</div>
-        % endif
-            % call(hurl) set_conc(conclusions)
-                <script>
-                    var timer = null;
-                    var title = $(document).prop('title');
-                    % if conclusions and (conclusions[0] ~ '%') == title
-                    title = title.replace('{{ conclusions[0] }}%', '%%%');
-                    % endif
+        % call(hurl) set_conc(conclusions)
+            <script>
+                var timer = null;
+                var title = $(document).prop('title');
+                % if conclusions and (conclusions[0] ~ '%') == title
+                title = title.replace('{{ conclusions[0] }}%', '%%%');
+                % endif
 
-                    function load()
+                function load()
+                {
+
+                    function set_conc(val)
                     {
-
-                        function set_conc(val)
+                        $('.conc').html($('<a/>',
                         {
-                            $('.conc').html($('<a/>',
-                            {
-                                href: '{{ hurl }}'.replace('%25', val + '%'),
-                                text: val + '%'
-                            }).on('hover', function (hv)
-                            {
-                                $.progress.update(val);
-                            }));
-                            $.progress.hide();
-
-                            $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
-                        }
-
-                        api_query('{{ url_for('api') }}/%', set_conc);
-                        clearInterval(timer);
-                        timer = setInterval(function()
+                            href: '{{ hurl }}'.replace('%25', val + '%'),
+                            text: val + '%'
+                        }).hover(function (hv)
                         {
-                            load();
-                        }, refresh_seconds());
+                            $.progress.update(val);
+                        }));
+
+                        $.progress.hide();
+
+                        $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
                     }
 
-                    load();
-                </script>
-            % endcall
+                    api_query('{{ url_for('api') }}/%', set_conc);
+                    clearInterval(timer);
+                    timer = setInterval(function()
+                    {
+                        load();
+                    }, refresh_seconds());
+                }
+
+                load();
+            </script>
+        % endcall
     </div>
     <div class="unit-33 text-centered">
         <span class="time">&mdash;</span>

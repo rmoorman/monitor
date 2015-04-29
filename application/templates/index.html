@@ -93,23 +93,23 @@
                         {
                             $.each(plot.getData(), function (i, dset)
                             {
+                                var ptime = null;
                                 var label = null;
-                                var value = null;
                                 var last = $(dset.data.filter(function(idx){ return idx[0] <= pos.x; })).first()[0];
                                 if (last !== undefined && last !== null)
                                 {
-                                    label = time_fmt(pos.x);
-                                    value = last[1];
+                                    ptime = time_fmt(pos.x);
                                     switch (dset.yaxis.n)
                                     {
-                                        case 2: value = byte_fmt(value) + ' [' + value + ']'; break;
-                                        case 3: value = uptime_fmt(value) + ' [' + value + ']'; break;
+                                        case 1: label = last[1] + ' [' + last[1] + ']'; break;
+                                        case 2: label = byte_fmt(last[1]) + ' [' + last[1] + ']'; break;
+                                        case 3: label = uptime_fmt(last[1]) + ' [' + last[1] + ']'; break;
                                         default: break;
                                     }
-                                }
-                                if (value !== null && value !== null)
-                                {
-                                    $('#legend_elems_'+dset.label).text(dset.label + ' (' + value + ' - ' + label + ')');
+                                    if (label !== undefined && label !== null)
+                                    {
+                                        $('#legend_elems_'+dset.label).text(dset.label + ' (' + label + ' - ' + ptime + ')');
+                                    }
                                 }
                             });
                         }
@@ -184,8 +184,8 @@
         {
             function reload(shouts)
             {
-                $('#shouts').text('');
-                $('#shouts').removeClass('hide');
+                $('#{{ the_shouts }}').text('');
+                $('#{{ the_shouts }}').removeClass('hide');
 
                 $.each(shouts, function (i, shout)
                 {
@@ -230,7 +230,7 @@
                         text: reltime_fmt(shout.time)
                     }))));
 
-                    $('#shouts').append(block);
+                    $('#{{ the_shouts }}').append(block);
                 });
             }
 
@@ -261,7 +261,7 @@
     </div>
 
     <div class="units-row units-padding end">
-        <div class="unit-100 hide" id="shouts"></div>
+        <div class="unit-100 hide" id="{{ the_shouts }}"><a>{{ the_shouts }}</a></div>
     </div>
 
     {{ render_shout_form(shout_form) }}

@@ -1,8 +1,8 @@
 from flask import url_for
 
 from application import app
+from application.models import Data, Sensor
 from application.service import short_conclusions, the_shouts
-from application.models import Sensor, Data
 from config import _jread
 
 _space_skel = _jread(app.config['SPACEAPI_JSON'])
