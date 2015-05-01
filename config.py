@@ -56,8 +56,8 @@ SPACEAPI_JSON = path.join(basedir, 'spaceapi.json')
 MAXKEEP = 60 * 60 * 24 * 14
 MAXCONC = 60 * 60 * 2
 
-AUTOREF_MIN = 15
-AUTOREF_MAX = 30
+AUTOREF_MIN = 30
+AUTOREF_MAX = 60
 
 LOGOS = ['evil_man.png', 'plug.png']
 SPACE_LOGO = 'cccmz_logo.png'

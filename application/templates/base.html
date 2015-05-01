@@ -68,9 +68,19 @@
     % block header
     % endblock header
     <style>
-        #logo {
-            max-height: 150px;
+        #logo-container:hover #logo
+        {
+            -ms-transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+            transform: rotateY(180deg);
         }
+        #logo
+        {
+            max-height: 150px;
+            transition: 0.4s;
+            transform-style: preserve-3d;
+        }
+
     </style>
 </head>
 <body class="units-padding">
@@ -79,9 +89,6 @@
 
 <header class="units-row end">
     <div class="unit-100 unit-centered">
-        <a href="{{ url_for('index') }}" class="left">
-            <img id="logo" src="{{ url_for('logo') }}" alt="big awesome company icon logo comic sans" />
-        </a>
         <nav class="navbar navbar-right">
             <ul>
                 % with messages = get_flashed_messages()
@@ -98,6 +105,9 @@
                 <li class="big"><h1>{{ set_conc(conclusions) }}</h1></li>
             </ul>
         </nav>
+        <a href="{{ url_for('index') }}" class="left" id="logo-container">
+            <img id="logo" src="{{ url_for('logo') }}" alt="big awesome company icon logo comic sans" />
+        </a>
     </div>
 </header>
 
@@ -130,7 +140,7 @@
                     {
                         $('.conc').html($('<a/>',
                         {
-                            href: '{{ hurl }}'.replace('%25', val + '%'),
+                            href: '{{ hurl }}'.replace('%25', val),
                             text: val + '%'
                         }).hover(function (hv)
                         {

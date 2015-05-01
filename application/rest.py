@@ -177,7 +177,7 @@ class GraphHandler(Resource):
 
 api.add_resource(AxisHandler, '/axis', '/axis/')
 api.add_resource(CollectionHandler, '/collection', '/collection/', '/collection/<string:name>')
-api.add_resource(ConcHandler, '/%', '/%/', '/<int:cc>%', '/<float:cc>%')
+api.add_resource(ConcHandler, '/%', '/%/', '/<int:cc>', '/<float:cc>', '/<int:cc>/', '/<float:cc>/')
 api.add_resource(DataHandler, '/data', '/data/', '/data/<string:sensorname>')
 api.add_resource(GraphHandler, '/graph', '/graph/', '/graph/<string:collectionname>')
 api.add_resource(SensorHandler, '/sensor', '/sensor/', '/sensor/<string:name>')

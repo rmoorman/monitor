@@ -87,7 +87,7 @@ echo $ERDSTRAHLEN
                 )|replace(
                     '###evar', '</var>'
                 )|replace(
-                    '###Status', '<a href="' ~ url_for('conc') ~ '">Status</a>'
+                    '###Status', '<a href="' ~ url_for('conc', cc=0) ~ '">Status</a>'
                 )|replace(
                     '###Graph', '<a href="' ~ url_for('index', _anchor=range(0, 10)|random) ~ '">Graph</a>'
                 )|replace(
@@ -292,7 +292,7 @@ if [ $ERDSTRAHLEN -eq 1337 ]; then
         {{ _listing([
             'Bei den "' ~ the_variation ~ '" handelt es sich nicht um das oben beschriebene Script.',
             'Es ist die Differenz der aufgerufenen URL vom ###Status zum tatsächlichen Wert des ###Status. Auf der Seite sowie in der API.',
-            'Beim Expliziten Aufruf der URL ###svar' ~ url_for('conc', cc=0) ~ '%###evar bzw. ###svar' ~ url_for('conc')|replace('%25', '') ~ '%###evar wird das ganze übersprungen.',
+            'Beim Expliziten Aufruf der URL ###svar' ~ url_for('conc', cc=0) ~ '%###evar bzw. ###svar' ~ url_for('conc', cc=0)|replace('%25', '') ~ '%###evar wird das ganze übersprungen.',
             'Der ###Sensor hat den Namen ###svar' ~ the_variation ~ '###evar, mit der ###Unit ###svar' ~ the_variation_unit ~ '###evar, und liegt in der ###Collection ###svar' ~ the_service_collection ~ '###evar.',
         ]) }}
     % endcall

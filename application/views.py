@@ -26,9 +26,7 @@ def index():
 
 
 @app.route('/%')
-@app.route('/<float:cc>%')
 @app.route('/<float:cc>')
-@app.route('/<int:cc>%')
 @app.route('/<int:cc>')
 def conc(cc=0.0):
     conclusions = jump_to_conclusions_mat()
