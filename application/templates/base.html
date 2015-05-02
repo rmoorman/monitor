@@ -33,9 +33,14 @@
             return moment.duration(seconds, 'seconds').humanize();
         };
 
+        function rand_num(max, min)
+        {
+            return Math.floor(Math.random() * (max - min) + min);
+        }
+
         function refresh_seconds ()
         {
-            return Math.floor(Math.random() * ({{ the_autoref_max }} - {{ the_autoref_min }}) + {{ the_autoref_min }});
+            return rand_num({{ the_autoref_max }}, {{ the_autoref_min }});
         }
 
         function api_query (endpoint, callb, method, data, errorcallb)
@@ -52,7 +57,7 @@
             }
             function ecb (ex, err, exp)
             {
-                $('#loader').text(err + ' - (' + exp + ')');
+                $('#loader').text(exp);
                 $('#loader').removeClass('hide');
             }
 
@@ -151,7 +156,7 @@
                         $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
                     }
 
-                    api_query('{{ url_for('api') }}/%', set_conc);
+                    api_query('{{ url_for('api') }}/' + rand_num(0, 100), set_conc);
                     clearInterval(timer);
                     timer = setInterval(function()
                     {
