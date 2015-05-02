@@ -3,14 +3,14 @@
 % endmacro
 
 % macro set_conc(conc=None)
+    % with guess = conc[0] if conc else range(0, 100)|random
     <span class="conc">
-        % with guess = conc[0] if conc else range(0, 99)|random
         <a href="{{ url_for('conc', cc=guess) }}">{{ guess }}%</a>
-        % endwith
     </span>
-    % if caller
-    {{ caller(url_for('conc')) }}
-    % endif
+        % if caller
+            {{ caller(url_for('conc', cc=guess), guess) }}
+        % endif
+    % endwith
 % endmacro
 
 % macro byte_format(bt)

@@ -125,7 +125,7 @@
         &mdash;
     </div>
     <div class="unit-33 text-centered">
-        % call(hurl) set_conc(conclusions)
+        % call(hurl, guess) set_conc(conclusions)
             <script>
                 var timer = null;
                 var title = $(document).prop('title');
@@ -135,12 +135,11 @@
 
                 function load()
                 {
-
                     function set_conc(val)
                     {
                         $('.conc').html($('<a/>',
                         {
-                            href: '{{ hurl }}'.replace('%25', val),
+                            href: '{{ hurl }}'.replace('{{ guess }}', val),
                             text: val + '%'
                         }).hover(function (hv)
                         {

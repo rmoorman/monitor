@@ -145,7 +145,7 @@ def handle_variation(given, expected):
     vr = round(abs(given - expected), 2)
     variation = Data(vr, sensor)
     db.session.add(variation)
-    flash('{}: {}'.format(the_variation, vr))
+    flash('{}'.format(vr))
     db.session.commit()
 
 
