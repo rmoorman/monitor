@@ -81,7 +81,7 @@ def jump_to_conclusions_mat():
         for sensor in Sensor.query.filter(Sensor.collection == collection).order_by(Sensor.name.asc()).all():
             ssum = None
             last = sensor.get_data().filter(Data.time > _cliff()).first()
-            if last and last.value:
+            if last and last.value is not None:
                 ssum = _ccnv(last.value, sensor.factor)
                 if ssum:
                     csum += ssum

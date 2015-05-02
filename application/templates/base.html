@@ -90,10 +90,13 @@
 </head>
 <body class="units-padding">
 
-% from 'macros.html' import dot, set_conc
+% from 'macros.html' import dot, dash, set_conc
 
 <header class="units-row end">
     <div class="unit-100 unit-centered">
+        <a href="{{ url_for('index') }}" class="left" id="logo-container">
+            <img id="logo" src="{{ url_for('logo') }}" alt="big awesome company icon logo comic sans" />
+        </a>
         <nav class="navbar navbar-right">
             <ul>
                 % with messages = get_flashed_messages()
@@ -105,14 +108,11 @@
                 % endfor
                 % endwith
                 <li><var id="loader" class="hide">{{ dot() }}</var>&nbsp;</li>
-                <li><span class="time">&mdash;</span></li>
+                <li><span class="time">{{ dash() }}</span></li>
                 <li><a href="{{ url_for('api') }}">api</a></li>
                 <li class="big"><h1>{{ set_conc(conclusions) }}</h1></li>
             </ul>
         </nav>
-        <a href="{{ url_for('index') }}" class="left" id="logo-container">
-            <img id="logo" src="{{ url_for('logo') }}" alt="big awesome company icon logo comic sans" />
-        </a>
     </div>
 </header>
 
@@ -125,14 +125,14 @@
 </div>
 
 <footer class="units-row end">
-    % from 'macros.html' import dot, set_conc
     <div class="unit-33 text-centered">
-        &mdash;
+        {{ dash() }}
     </div>
     <div class="unit-33 text-centered">
         % call(hurl, guess) set_conc(conclusions)
             <script>
                 var timer = null;
+                var guess = {{ guess }};
                 var title = $(document).prop('title');
                 % if conclusions and (conclusions[0] ~ '%') == title
                 title = title.replace('{{ conclusions[0] }}%', '%%%');
@@ -152,11 +152,11 @@
                         }));
 
                         $.progress.hide();
-
                         $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
+                        guess = val;
                     }
 
-                    api_query('{{ url_for('api') }}/' + rand_num(0, 100), set_conc);
+                    api_query('{{ url_for('api') }}/' + guess, set_conc);
                     clearInterval(timer);
                     timer = setInterval(function()
                     {
@@ -169,7 +169,7 @@
         % endcall
     </div>
     <div class="unit-33 text-centered">
-        <span class="time">&mdash;</span>
+        <span class="time">{{ dash() }}</span>
         <script>
             setInterval(function()
             {

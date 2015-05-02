@@ -8,6 +8,10 @@
     <script>
     $(function ()
     {
+        var anchor = $(location).attr('hash').replace('#', '');
+        var draw_timer;
+        var cycle_timer;
+
         function black_or_white (color)
         {
             var rgb = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
@@ -70,7 +74,6 @@
                 } // 3: seconds
             ]
         }
-        var timer;
 
         function load()
         {
@@ -123,8 +126,8 @@
                 });
                 $('#source_elems_'+source).parent().addClass('active');
 
-                clearInterval(timer);
-                timer = setInterval(function() {
+                clearInterval(draw_timer);
+                draw_timer = setInterval(function() {
                     draw(source);
                 }, refresh_seconds());
 
@@ -137,11 +140,17 @@
                 $('#source_elems').text('');
                 $('#sources').removeClass('hide');
 
+                var draw_num = 0;
+
                 $.each(sources, function (i, source)
                 {
                     $('#source_elems').append(
-                        $('<li/>').append(
-                            $('<a/>', {
+                        $('<li/>',
+                            {
+                                id: source,
+                            }).append(
+                            $('<a/>',
+                            {
                                 id: 'source_elems_'+source,
                                 text: source
                             }).on('click', function (cl)
@@ -151,14 +160,21 @@
                         )
                     );
 
-                    var display = parseInt($(location).attr('hash').replace('#', ''), 10);
-                    display = (display ? (display % sources.length) : 0);
-
-                    if (i == display)
+                    if (anchor == source || i == draw_num)
                     {
                         draw(source);
                     }
                 });
+
+                if(anchor == 'cycle')
+                {
+                    clearInterval(cycle_timer);
+                    cycle_timer = setInterval(function() {
+                        clearInterval(draw_timer);
+                        draw_num = (draw_num + 1 < sources.length ? draw_num + 1 : 0)
+                        draw(sources[draw_num]);
+                    }, 2 * refresh_seconds());
+                }
             }
 
             api_query('{{ url_for('api') }}/graph', reload)

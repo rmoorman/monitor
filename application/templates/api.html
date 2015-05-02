@@ -19,11 +19,11 @@
         </table>
     % endmacro
 
-    % macro _curl(url, method, data=none, pre=false)
-curl{{ ' -u "user:pass"' if method != 'GET' }} -X {{ method }} {{ url_for('api', _external=true) }}/{{ url }}{{ ' \\' if pre and data }}
+    % macro _curl(url, method, data=none, pre=false, ident='')
+{{ ident }}curl{{ ' -u "user:pass"' if method != 'GET' }} -X {{ method }} {{ url_for('api', _external=true) }}/{{ url }}{{ ' \\' if pre and data }}
 % if data
 % for (field, sample) in data
-    -d {{ field }}={{ sample }}{{ ' \\' if pre and not loop.last }}
+{{ ident ~ '\t' }}-d {{ field }}={{ sample }}{{ ' \\' if pre and not loop.last }}
 % endfor
 % endif
     % endmacro
@@ -89,7 +89,7 @@ echo $ERDSTRAHLEN
                 )|replace(
                     '###Status', '<a href="' ~ url_for('conc', cc=0) ~ '">Status</a>'
                 )|replace(
-                    '###Graph', '<a href="' ~ url_for('index', _anchor=range(0, 10)|random) ~ '">Graph</a>'
+                    '###Graph', '<a href="' ~ url_for('index') ~ '">Graph</a>'
                 )|replace(
                     '###' ~ the_shouts , '<a href="' ~ url_for('index', _anchor=the_shouts) ~ '">' ~ the_shouts ~ '</a>'
                 )|safe|replace(
@@ -276,13 +276,14 @@ echo $ERDSTRAHLEN
     Zum Beispiel lassen sich {{ the_shouts }} bei bestimmten Ereignissen auch per api pushen:
     % call _hartmann_gitter()
 if [ $ERDSTRAHLEN -eq 1337 ]; then
-  {{ _curl(
-        'data', 'POST', [
-            ('sensor', '"' ~ the_shouts ~ '"'),
-            ('value', '"Erdstrahlen Overload! Sofort evakuieren!!1!"')
-        ],
-        pre=true
-    ) }}fi
+{{ _curl(
+    'data', 'POST', [
+        ('sensor', '"' ~ the_shouts ~ '"'),
+        ('value', '"Erdstrahlen Overload! Sofort evakuieren!!1!"')
+    ],
+    pre=true,
+    ident='\t'
+) }}fi
     % endcall
 
     % call _segment(
