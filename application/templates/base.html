@@ -1,9 +1,11 @@
+% from 'macros.html' import atom, dot, dash, set_conc
 <!DOCTYPE HTML>
 <html>
 <head>
     <meta charset="UTF-8" />
     <title>{{ title ~ ' | ' if title }}monitor</title>
     <link href="{{ url_for('logo') }}" rel="shortcut icon">
+    <link href="{{ url_for('atom_feed') }}" rel="alternate" title="monitor - {{ the_shouts }} feed" type="application/atom+xml">
     <link href="{{ url_for('static', filename='css/kube.min.css') }}" rel="stylesheet" />
     <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/kube.min.js') }}"></script>
@@ -69,6 +71,49 @@
                 success: cb
             });
         }
+
+        setInterval(function()
+        {
+            $('.time').text(time_fmt(new Date()));
+        }, 250)
+
+        % call(hurl, guess) set_conc(conclusions)
+
+        var conc_timer;
+        var guess = {{ guess }};
+        var title = $(document).prop('title');
+        % if conclusions and (conclusions[0] ~ '%') == title
+        title = title.replace('{{ conclusions[0] }}%', '%%%');
+        % endif
+
+        function load_conc()
+        {
+            function set_conc(val)
+            {
+                $('.conc').html($('<a/>',
+                {
+                    href: '{{ hurl }}'.replace('{{ guess }}', val),
+                    text: val + '%'
+                }).hover(function (hv)
+                {
+                    $.progress.update(val);
+                }));
+
+                $.progress.hide();
+                $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
+                guess = val;
+            }
+
+            api_query('{{ url_for('api') }}/' + guess, set_conc);
+            clearInterval(conc_timer);
+            conc_timer = setInterval(function()
+            {
+                load_conc();
+            }, refresh_seconds());
+        }
+
+        load_conc();
+        % endcall
     </script>
     % block header
     % endblock header
@@ -85,12 +130,9 @@
             transition: 0.4s;
             transform-style: preserve-3d;
         }
-
     </style>
 </head>
 <body class="units-padding">
-
-% from 'macros.html' import dot, dash, set_conc
 
 <header class="units-row end">
     <div class="unit-100 unit-centered">
@@ -125,58 +167,15 @@
 </div>
 
 <footer class="units-row end">
-    <div class="unit-33 text-centered">
-        {{ dash() }}
-    </div>
-    <div class="unit-33 text-centered">
-        % call(hurl, guess) set_conc(conclusions)
-            <script>
-                var timer = null;
-                var guess = {{ guess }};
-                var title = $(document).prop('title');
-                % if conclusions and (conclusions[0] ~ '%') == title
-                title = title.replace('{{ conclusions[0] }}%', '%%%');
-                % endif
-
-                function load()
-                {
-                    function set_conc(val)
-                    {
-                        $('.conc').html($('<a/>',
-                        {
-                            href: '{{ hurl }}'.replace('{{ guess }}', val),
-                            text: val + '%'
-                        }).hover(function (hv)
-                        {
-                            $.progress.update(val);
-                        }));
-
-                        $.progress.hide();
-                        $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
-                        guess = val;
-                    }
-
-                    api_query('{{ url_for('api') }}/' + guess, set_conc);
-                    clearInterval(timer);
-                    timer = setInterval(function()
-                    {
-                        load();
-                    }, refresh_seconds());
-                }
-
-                load();
-            </script>
-        % endcall
-    </div>
-    <div class="unit-33 text-centered">
-        <span class="time">{{ dash() }}</span>
-        <script>
-            setInterval(function()
-            {
-                $('.time').text(time_fmt(new Date()));
-            }, 250)
-        </script>
-    </div>
+    <nav class="navbar fullwidth">
+        <ul>
+            <li class="text-centered">
+                <a href="{{ url_for('atom_feed') }}" rel="alternate" title="monitor - {{ the_shouts }} feed" type="application/atom+xml">{{ atom() }}</a>
+            </li>
+            <li class="text-centered">{{ set_conc(conclusions) }}</li>
+            <li class="text-centered"><span class="time">{{ dash() }}</span></li>
+        </ul>
+    </nav>
 </footer>
 
 </body>

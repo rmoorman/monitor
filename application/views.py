@@ -3,12 +3,10 @@ from random import choice
 from flask import flash, render_template, request, send_from_directory
 
 from application import app
-from application.forms import ShoutForm
-from application.service import (
-    handle_shout,
-    handle_variation,
-    jump_to_conclusions_mat
-)
+from application.conc import jump_to_conclusions_mat
+from application.feeds import feed_shouts
+from application.forms import ShoutForm, handle_shout
+from application.service import handle_variation
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -51,6 +49,11 @@ def api():
         'api.html',
         title='api'
     )
+
+
+@app.route('/feed.atom')
+def atom_feed():
+    return feed_shouts()
 
 
 @app.errorhandler(404)

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# from application import app, db
 from application.startup import init_app
 
 app = init_app()

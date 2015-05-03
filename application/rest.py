@@ -3,12 +3,12 @@ from flask.ext.restful.reqparse import RequestParser
 
 from application import api, db
 from application.auth import requires_auth
+from application.conc import short_conclusions
 from application.models import Collection, Data, Sensor, Unit
 from application.service import (
     handle_variation,
     retrieve_dbo,
     sanitize_name,
-    short_conclusions,
     the_axis,
     the_non_collection
 )
@@ -181,5 +181,5 @@ api.add_resource(ConcHandler, '/%', '/%/', '/<int:cc>', '/<float:cc>', '/<int:cc
 api.add_resource(DataHandler, '/data', '/data/', '/data/<string:sensorname>')
 api.add_resource(GraphHandler, '/graph', '/graph/', '/graph/<string:collectionname>')
 api.add_resource(SensorHandler, '/sensor', '/sensor/', '/sensor/<string:name>')
-api.add_resource(SpaceHandler, '/space', '/space/', '/SpaceAPI', '/SpaceAPI/')
+api.add_resource(SpaceHandler, '/space', '/space/')
 api.add_resource(UnitHandler, '/unit', '/unit/', '/unit/<string:name>')

@@ -1,8 +1,9 @@
 from flask import url_for
 
 from application import app
+from application.conc import short_conclusions
 from application.models import Data, Sensor
-from application.service import short_conclusions, the_shouts
+from application.service import get_shouts
 from config import _jread
 
 _space_skel = _jread(app.config['SPACEAPI_JSON'])
@@ -33,6 +34,8 @@ def spaceapi():
         return res
 
     conclusions = short_conclusions()
+    shouts = get_shouts()
+
     space_is_open = True if conclusions >= 100 else False
     logo_url = url_for('static', filename=app.config['SPACE_LOGO'], _external=True)
     open_url = url_for('static', filename=app.config['SPACE_OPEN'], _external=True)
@@ -49,10 +52,11 @@ def spaceapi():
     if latest_data:
         _set_field(['state', 'lastchange'], latest_data.ms())
 
-    shouts = Sensor.query.filter(Sensor.name == the_shouts).first()
-    lshout = shouts.get_data().first().num(fallback=True) if shouts and shouts.get_data().first() else None
-
-    _set_field(['state', 'message'], '{}% chance someone is there! last message: \'{}\''.format(conclusions, lshout if lshout else 'none'))
+    last_shout = shouts.get_data().first()
+    _set_field(['state', 'message'], '{}% chance someone is there! last message: \'{}\''.format(
+        conclusions,
+        last_shout.num(fallback=True) if last_shout else 'no shouts, sorry')
+    )
 
     _set_field(['icon', 'closed'], closed_url)
     _set_field(['icon', 'open'], open_url)

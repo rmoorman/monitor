@@ -155,6 +155,7 @@
                                 text: source
                             }).on('click', function (cl)
                             {
+                                clearInterval(cycle_timer);
                                 draw(source);
                             })
                         )

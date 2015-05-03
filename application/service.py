@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from string import ascii_letters, digits
 
-from flask import flash
 from flask.ext.restful import abort
 
 from application import app, db
@@ -38,7 +37,7 @@ def retrieve_dbo(mdl, name, create=False):
     return dbo
 
 
-def _cliff():
+def cliff():
     return (datetime.utcnow() - timedelta(seconds=app.config['MAXCONC']))
 
 
@@ -50,97 +49,46 @@ def the_del_cliff():
     return int(1000 * (datetime.utcnow() - datetime.utcfromtimestamp(app.config['MAXKEEP'])).total_seconds())
 
 
-def _ccnv(stf, fac):
-    res = None
-    if stf and fac:
-        try:
-            res = round(float(stf) * fac, 2)
-        except ValueError:
-            pass
-    return res
+def _service_sensor(unit_name, sensor_name, axis=0, factor=0.0, sensor_description=None, unit_description=None):
+    unit = retrieve_dbo(Unit, unit_name, create=True)
+    unit.description = unit_description
+    unit.axis = axis
+    db.session.add(unit)
 
-
-def short_conclusions():
-    result = 0.0
-
-    for sensor in Sensor.query.filter(Sensor.factor > 0.0).all():
-        last = sensor.get_data().filter(Data.time > _cliff()).first()
-        if last and last.value:
-            res = _ccnv(last.value, sensor.factor)
-            if res:
-                result += res
-    return round(result, 2)
-
-
-def jump_to_conclusions_mat():
-    result = list()
-    rsum = 0.0
-    for collection in Collection.query.order_by(Collection.name.asc()).all() + [None]:
-        cresult = list()
-        csum = 0.0
-        for sensor in Sensor.query.filter(Sensor.collection == collection).order_by(Sensor.name.asc()).all():
-            ssum = None
-            last = sensor.get_data().filter(Data.time > _cliff()).first()
-            if last and last.value is not None:
-                ssum = _ccnv(last.value, sensor.factor)
-                if ssum:
-                    csum += ssum
-                    rsum += ssum
-            cresult.append((ssum, sensor))
-        if len(cresult):
-            result.append((round(csum, 2), collection, cresult))
-    return (round(rsum, 2), result)
-
-
-def _service_collection(sensor):
     collection = retrieve_dbo(Collection, the_service_collection, create=True)
     collection.description = 'System-Sammlung'
     db.session.add(collection)
 
-    if sensor:
-        sensor.collection = collection
-        db.session.add(sensor)
+    sensor = retrieve_dbo(Sensor, sensor_name, create=unit)
+    sensor.description = sensor_description
+    sensor.factor = factor
+    sensor.collection = collection
+    db.session.add(sensor)
+
+    db.session.commit()
+    return sensor
 
 
-def handle_shout(form):
-    if form.validate():
-        data = form.data
-
-        unit = retrieve_dbo(Unit, the_shouts, create=True)
-        unit.description = 'Nachrichten-Einheit'
-        unit.axis = 0
-        db.session.add(unit)
-
-        sensor = retrieve_dbo(Sensor, the_shouts, create=unit)
-        sensor.description = 'Nachrichten-Sensor'
-        sensor.factor = 0.0
-        db.session.add(sensor)
-
-        _service_collection(sensor)
-
-        if data.get('save'):
-            if not Data.query.filter(Data.value == data.get('shout')).count():
-                shout = Data(data.get('shout'), sensor)
-                db.session.add(shout)
-                flash('ok')
-            else:
-                flash('hatten wir schon')
-
-        db.session.commit()
+def get_shouts():
+    return _service_sensor(
+        the_shouts,
+        the_shouts,
+        axis=0,
+        factor=0.0,
+        sensor_description='Nachrichten-Sensor',
+        unit_description='Nachrichten-Einheit',
+    )
 
 
 def handle_variation(given, expected):
-    unit = retrieve_dbo(Unit, the_variation_unit, create=True)
-    unit.description = 'Erdstrahlenbelastung in Bovis'
-    unit.axis = 1
-    db.session.add(unit)
-
-    sensor = retrieve_dbo(Sensor, the_variation, create=unit)
-    sensor.description = 'Erdstrahlenberechnung im Hartmann-Gitter'
-    sensor.factor = 0.0
-    db.session.add(sensor)
-
-    _service_collection(sensor)
+    sensor = _service_sensor(
+        the_variation_unit,
+        the_variation,
+        axis=1,
+        factor=0.0,
+        sensor_description='Erdstrahlenberechnung im Hartmann-Gitter',
+        unit_description='Erdstrahlenbelastung in Bovis',
+    )
 
     vr = round(abs(given - expected), 2)
     variation = Data(vr, sensor)
@@ -156,5 +104,6 @@ app.jinja_env.globals.update(the_del_cliff=the_del_cliff)
 app.jinja_env.globals.update(the_non_collection=the_non_collection)
 app.jinja_env.globals.update(the_service_collection=the_service_collection)
 app.jinja_env.globals.update(the_shouts=the_shouts)
+app.jinja_env.globals.update(the_space_sensors=app.config['SPACE_SENSORS'])
 app.jinja_env.globals.update(the_variation=the_variation)
 app.jinja_env.globals.update(the_variation_unit=the_variation_unit)

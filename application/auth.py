@@ -16,6 +16,9 @@ def ask_auth():
         '{} - Bitte zuerst einloggen\n'.format(choice([
             'Das geht so nicht.',
             'Das ist Falsch!',
+            'Der Computer sagt: "Nein"',
+            'Gefahr',
+            'Nix da',
             'Obacht',
             'So nicht!',
             'Um Himmels willen, nein!'

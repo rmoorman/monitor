@@ -1,3 +1,7 @@
+% macro atom()
+    &#x2622;
+% endmacro
+
 % macro dot()
     &bull;
 % endmacro
@@ -8,11 +12,10 @@
 
 % macro set_conc(conc=None)
     % with guess = conc[0] if conc else range(0, 100)|random
-    <span class="conc">
-        <a href="{{ url_for('conc', cc=guess) }}">{{ guess }}%</a>
-    </span>
         % if caller
             {{ caller(url_for('conc', cc=guess), guess) }}
+        % else
+            <span class="conc"><a href="{{ url_for('conc', cc=guess) }}">{{ guess }}%</a></span>
         % endif
     % endwith
 % endmacro

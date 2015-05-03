@@ -73,29 +73,37 @@ echo $ERDSTRAHLEN
             % with del_cliff = time_format(the_del_cliff()) + ' (' + reltime_format(the_del_cliff()) ~ ')'
             <li>{{
                 elem|replace(
-                    '###Unit', '<a class="bold" href="' ~ url_for('api', _anchor='unit') ~ '">Unit</a>'
+                    'Unit', '<a class="bold" href="' ~ url_for('api', _anchor='unit') ~ '">Unit</a>'
                 )|replace(
-                    '###Axis', '<a class="bold" href="' ~ url_for('api', _anchor='axis') ~ '">Axis</a>'
+                    'Axis', '<a class="bold" href="' ~ url_for('api', _anchor='axis') ~ '">Axis</a>'
                 )|replace(
-                    '###Sensor', '<a class="bold" href="' ~ url_for('api', _anchor='sensor') ~ '">Sensor</a>'
+                    'Sensor', '<a class="bold" href="' ~ url_for('api', _anchor='sensor') ~ '">Sensor</a>'
                 )|replace(
-                    '###Data', '<a class="bold" href="' ~ url_for('api', _anchor='data') ~ '">Data</a>'
+                    'Data', '<a class="bold" href="' ~ url_for('api', _anchor='data') ~ '">Data</a>'
                 )|replace(
-                    '###Collection', '<a class="bold" href="' ~ url_for('api', _anchor='collection') ~ '">Collection</a>'
+                    'Collection', '<a class="bold" href="' ~ url_for('api', _anchor='collection') ~ '">Collection</a>'
                 )|replace(
-                    '###svar', '<var>'
+                    'SpaceAPI', '<a class="bold" href="' ~ url_for('api', _anchor='spaceapi') ~ '">SpaceAPI</a>'
                 )|replace(
-                    '###evar', '</var>'
+                    'Feed', '<a class="bold" href="' ~ url_for('atom_feed') ~ '">Feed</a>'
                 )|replace(
-                    '###Status', '<a href="' ~ url_for('conc', cc=0) ~ '">Status</a>'
+                    'Status', '<a href="' ~ url_for('conc', cc=0) ~ '">Status</a>'
                 )|replace(
-                    '###Graph', '<a href="' ~ url_for('index') ~ '">Graph</a>'
+                    'Graph', '<a href="' ~ url_for('index') ~ '">Graph</a>'
                 )|replace(
-                    '###' ~ the_shouts , '<a href="' ~ url_for('index', _anchor=the_shouts) ~ '">' ~ the_shouts ~ '</a>'
+                    '__v', '<var>'
+                )|replace(
+                    'v__', '</var>'
+                )|replace(
+                    '__s', '<small>'
+                )|replace(
+                    's__', '</small>'
+                )|replace(
+                    '_' ~ the_shouts , '<a href="' ~ url_for('index', _anchor=the_shouts) ~ '">' ~ the_shouts ~ '</a>'
                 )|safe|replace(
-                    '###cliff', cliff
+                    '__cliff', cliff
                 )|replace(
-                    '###del_cliff', del_cliff
+                    '__dcliff', del_cliff
                 )|safe
             }}</li>
             % endwith
@@ -122,8 +130,8 @@ echo $ERDSTRAHLEN
         ]
     )
         {{ _listing([
-            'Bevor man einen ###Sensor erstellen kann, muss eine ###Unit existieren.',
-            'Möchte man ###Data eines ###Sensors aus dem ###Graph ausschließen, wählt man hier als ###Axis die ###svar0###evar.'
+            'Bevor man einen Sensor erstellen kann, muss eine Unit existieren.',
+            'Möchte man Data eines Sensors aus dem Graph ausschließen, wählt man hier als Axis die __v0v__.'
         ]) }}
     % endcall
 
@@ -136,11 +144,11 @@ echo $ERDSTRAHLEN
         <ul class="blocks-2">
             <li>
                 {{ _listing([
-                    'Die ###Axis einer ###Unit bestimmt auf welcher y-Achse ###Data eines ###Sensors im ###Graph angezeigt und deren Werte formatiert werden.'
+                    'Die Axis einer Unit bestimmt auf welcher y-Achse Data eines Sensors im Graph angezeigt und deren Werte formatiert werden.'
                 ]) }}
             </li>
             <li>
-                <table class="table-flat table-hovered width-50 unit-centered">
+                <table class="table-flat table-hovered width-75 unit-centered">
                     <tr>
                         <th class="width-50 text-centered">Achse</th>
                         <th class="width-50 text-centered">Formatierung</th>
@@ -170,10 +178,10 @@ echo $ERDSTRAHLEN
         ]
     )
         {{ _listing([
-            'Ohne ###Sensor kann nicht nach ###Data geschrieben werden.',
-            'Ein ###Sensor existiert immer in Abhängigkeit zu einer ###Unit.',
-            'Mehrere ###Sensoren können in ###Collections gruppiert werden.',
-            'Der ###svarfactor###evar bestimmt die Gewichtung des letzten Werts im ###Status. Möchte man die Werte davon ausschließen wählt man hier den Wert ###svar0.0###evar.'
+            'Ohne Sensor kann nicht nach Data geschrieben werden.',
+            'Ein Sensor existiert immer in Abhängigkeit zu einer Unit.',
+            'Mehrere Sensoren können in Collections gruppiert werden.',
+            'Der __vfactorv__ bestimmt die Gewichtung des letzten Werts im Status. Möchte man die Werte davon ausschließen wählt man hier den Wert __v0.0v__.'
         ]) }}
     % endcall
 
@@ -194,11 +202,11 @@ echo $ERDSTRAHLEN
         ]
     )
         {{ _listing([
-            '###Data lässt sich nur unter Angabe eines ###Sensors schreiben.',
-            'Zeit ist immer in ###svarutc###evar und wird der api in ###svarms###evar angegeben: ( z.B. ###svar' ~ del_cliff ~ '###evar )',
-            'Vor dem Schreiben werden Einträge älter als der ###del_cliff gelöscht.',
-            'Einträge älter als der ###cliff werden zur Berechnung des ###Status nicht mit einbezogen.',
-            'Da mehrere Einträge mit der selben ###svarvalue###evar zu unterschiedlichen ###svartime###evar existieren können, muss man zum löschen die ###svartime###evar mit angeben.'
+            'Data lässt sich nur unter Angabe eines Sensors schreiben.',
+            'Zeit ist immer in __vutcv__ und wird der api in __vmsv__ angegeben: ( z.B. __v' ~ del_cliff ~ 'v__ )',
+            'Vor dem Schreiben werden Einträge älter als der __dcliff gelöscht.',
+            'Einträge älter als der __cliff werden zur Berechnung des Status nicht mit einbezogen.',
+            'Da mehrere Einträge mit der selben __vvaluev__ zu unterschiedlichen __vtimev__ existieren können, muss man zum Löschen die __vtimev__ mit angeben.'
         ]) }}
     % endcall
     % endwith
@@ -229,8 +237,8 @@ echo $ERDSTRAHLEN
         ]
     )
         {{ _listing([
-            'In einer ###Collection können ###Sensoren gruppiert werden.',
-            'Wurde einem ###Sensor noch keine ###Collection zugeordnet so erscheint er im ###Graph und im ###Status unter ###svar' ~ the_non_collection ~ '###evar.'
+            'In einer Collection können Sensoren gruppiert werden.',
+            'Wurde einem Sensor noch keine Collection zugeordnet so erscheint er im Graph und im Status unter __v' ~ the_non_collection ~ 'v__.'
         ]) }}
     % endcall
 
@@ -242,9 +250,9 @@ echo $ERDSTRAHLEN
         ]
     )
         {{ _listing([
-            'Wird zur Anzeige des ###Graph benötigt.',
-            'Liefert als Übersicht eine Liste von ###Collections (und ggf. ###svar' ~ the_non_collection ~ '###evar) für die einzelnen Tabs.',
-            'Als Details wird ###Data aller ###Sensoren der ###Collection in ###Graph-Kompatibel geliefert.'
+            'Wird zur Anzeige des Graph benötigt.',
+            'Liefert als Übersicht eine Liste von Collections (und ggf. __v' ~ the_non_collection ~ 'v__) für die einzelnen Tabs.',
+            'Als Details wird Data aller Sensoren der Collection in Graph-Kompatibel geliefert.'
         ]) }}
     % endcall
 
@@ -257,9 +265,41 @@ echo $ERDSTRAHLEN
         ]
     )
         {{ _listing([
-            'Gibt den ermittelten Wert des ###Status zurück.',
-            'Wird genutzt um den ###Status im Titel zu aktualisieren.',
+            'Gibt den ermittelten Wert des Status zurück.',
+            'Wird genutzt um den Status im Titel zu aktualisieren.',
         ]) }}
+    % endcall
+    % endwith
+
+    % with hs_base = 'https://spaceapi.net/documentation'
+    % call _segment(
+        'SpaceAPI',
+        [
+            ('space', 'GET', none, 'Details')
+        ]
+    )
+        <ul class="blocks-2">
+            <li>
+                {{ _listing([
+                    'Die Anbindung and die <a href="' ~ hs_base ~ '">HackerspaceAPI</a>.',
+                    'Dort werden Werte der Sensoren mit eingebunden, falls diese existieren und Data dazu vorliegt.'
+                ]) }}
+            </li>
+            <li>
+                <table class="table-flat table-hovered width-75 unit-centered">
+                    <tr>
+                        <th class="width-50 text-centered">Feld</th>
+                        <th class="width-50 text-centered">Sensoren</th>
+                    </tr>
+                    % for s in the_space_sensors
+                    <tr>
+                        <td class="width-50 text-centered"><a href="{{ hs_base }}#documentation-ref-13-root-sensors-{{ s }}">{{ s }}</a></td>
+                        <td class="width-50 text-centered">{{ the_space_sensors[s]|join(', ') }}</td>
+                    </tr>
+                    % endfor
+                </table>
+            </li>
+        </ul>
     % endcall
     % endwith
 
@@ -268,8 +308,9 @@ echo $ERDSTRAHLEN
         []
     )
         {{ _listing([
-            'Bei den "###' ~ the_shouts ~ '" handelt es sich um die Nachrichten unterhalb vom ###Graph.',
-            'Der ###Sensor hat den Namen ###svar' ~ the_shouts ~ '###evar, mit der ###Unit ###svar' ~ the_shouts ~ '###evar, und liegt in der ###Collection ###svar' ~ the_service_collection ~ '###evar.',
+            'Bei den "_' ~ the_shouts ~ '" handelt es sich um die Nachrichten unterhalb vom Graph.',
+            'Der Sensor hat den Namen __v' ~ the_shouts ~ 'v__, mit der Unit __v' ~ the_shouts ~ 'v__, und liegt in der Collection __v' ~ the_service_collection ~ 'v__.',
+            'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf des Feeds oder der SpaceAPI automatisch erstellt.'
         ]) }}
     % endcall
 
@@ -291,10 +332,11 @@ if [ $ERDSTRAHLEN -eq 1337 ]; then
         []
     )
         {{ _listing([
-            'Bei den "' ~ the_variation ~ '" handelt es sich nicht um das oben beschriebene Script.',
-            'Es ist die Differenz der aufgerufenen URL vom ###Status zum tatsächlichen Wert des ###Status. Auf der Seite sowie in der API.',
-            'Beim Expliziten Aufruf der URL ###svar' ~ url_for('conc', cc=0) ~ '%###evar bzw. ###svar' ~ url_for('conc', cc=0)|replace('%25', '') ~ '%###evar wird das ganze übersprungen.',
-            'Der ###Sensor hat den Namen ###svar' ~ the_variation ~ '###evar, mit der ###Unit ###svar' ~ the_variation_unit ~ '###evar, und liegt in der ###Collection ###svar' ~ the_service_collection ~ '###evar.',
+            'Bei den "' ~ the_variation ~ '" handelt es sich nicht um das oben beschriebene Script. __s(Nein! Doch!! Ohhh!!!)s__',
+            'Es ist die Differenz der aufgerufenen URL vom Status zum tatsächlichen Wert des Status.',
+            'Beim Expliziten Aufruf der URL __v[ ' ~ url_for('api') ~ ' ]' ~ url_for('conc', cc=0) ~ 'v__ bzw. __v[ ' ~ url_for('api') ~ ' ]' ~ url_for('conc')|replace('%25', '') ~ '%v__ wird das ganze übersprungen.',
+            'Der Sensor hat den Namen __v' ~ the_variation ~ 'v__, mit der Unit __v' ~ the_variation_unit ~ 'v__, und liegt in der Collection __v' ~ the_service_collection ~ 'v__.',
+            'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf (mit abweichendem Wert) des Status automatisch erstellt.'
         ]) }}
     % endcall
 
