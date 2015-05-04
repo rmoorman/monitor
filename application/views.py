@@ -75,3 +75,12 @@ def logo():
         choice(app.config['LOGOS']),
         mimetype='image/png'
     )
+
+
+@app.route('/bg.png')
+def background():
+    return send_from_directory(
+        app.static_folder,
+        'bg{}.png'.format(choice(range(1, 9))),
+        mimetype='image/png'
+    )

@@ -118,6 +118,15 @@
     % block header
     % endblock header
     <style>
+        body
+        {
+            background: rgb(255, 255, 255) url("{{ url_for('background') }}");
+        }
+        header, .main-content, footer
+        {
+            background: rgb(255, 255, 255);
+            background: rgba(255, 255, 255, 0.95);
+        }
         #logo-container:hover #logo
         {
             -ms-transform: rotateY(180deg);
