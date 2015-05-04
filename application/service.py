@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from string import ascii_letters, digits
 
 from flask.ext.restful import abort
@@ -35,10 +35,6 @@ def retrieve_dbo(mdl, name, create=False):
         dbo = mdl(name) if create is True else mdl(name, create) if create else mdl(name)
         db.session.add(dbo)
     return dbo
-
-
-def cliff():
-    return (datetime.utcnow() - timedelta(seconds=app.config['MAXCONC']))
 
 
 def the_cliff():
@@ -80,8 +76,8 @@ def get_shouts():
     )
 
 
-def handle_variation(given, expected):
-    sensor = _service_sensor(
+def get_variation():
+    return _service_sensor(
         the_variation_unit,
         the_variation,
         axis=1,
@@ -90,8 +86,13 @@ def handle_variation(given, expected):
         unit_description='Erdstrahlenbelastung in Bovis',
     )
 
-    vr = round(abs(given - expected), 2)
-    variation = Data(vr, sensor)
+
+def handle_variation(given, expected):
+    sensor = get_variation()
+    variation = Data(
+        round(abs(given - expected), 2),
+        sensor
+    )
     db.session.add(variation)
     db.session.commit()
 

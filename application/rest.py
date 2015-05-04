@@ -6,11 +6,15 @@ from application.auth import requires_auth
 from application.conc import short_conclusions
 from application.models import Collection, Data, Sensor, Unit
 from application.service import (
+    get_shouts,
+    get_variation,
     handle_variation,
     retrieve_dbo,
     sanitize_name,
     the_axis,
-    the_non_collection
+    the_non_collection,
+    the_shouts,
+    the_variation
 )
 from application.space import spaceapi
 
@@ -131,16 +135,25 @@ class SensorHandler(Resource):
 
 
 class DataHandler(Resource):
+    def _rtrv_sensor(self, name):
+        sensor = None
+        if name == the_shouts:
+            sensor = get_shouts()
+        elif name == the_variation:
+            sensor = get_variation()
+        else:
+            sensor = retrieve_dbo(Sensor, name)
+        return sensor
+
     def get(self, sensorname=None):
         if sensorname:
-            sensor = retrieve_dbo(Sensor, sensorname)
-            return [data.api_repr() for data in sensor.get_data().all()]
+            return [data.api_repr() for data in self._rtrv_sensor(sensorname).get_data().all()]
         abort(400, error='please specify a sensor')
 
     @requires_auth
     def post(self, sensorname=None):
         a = _get_input(['value', 'sensor'])
-        data = Data(a.get('value'), retrieve_dbo(Sensor, a.get('sensor')))
+        data = Data(a.get('value'), self._rtrv_sensor(a.get('sensor')))
         db.session.add(data)
         db.session.commit()
 
@@ -164,16 +177,23 @@ class DataHandler(Resource):
 
 class GraphHandler(Resource):
     def get(self, collectionname=None):
+        def _chk_sens(s):
+            return all([
+                s.unit,
+                s.unit.axis in the_axis.keys(),
+                s.get_data().first()
+            ])
         non_collection = None
         if collectionname:
             collection = non_collection if collectionname == the_non_collection else retrieve_dbo(Collection, collectionname)
             return [
                 sensor.flot_repr() for sensor in Sensor.query.filter(Sensor.collection == collection).order_by(Sensor.name.asc()).all()
-                if sensor and sensor.unit and sensor.unit.axis in the_axis.keys()
+                if _chk_sens(sensor)
             ]
-        res = [c.name for c in Collection.query.order_by(Collection.name.asc()).all() if c.sensors.count() and any([s.unit.axis for s in c.sensors.all()])]
-        return res + [the_non_collection] if Sensor.query.filter(Sensor.collection == non_collection).count() else res
-
+        return sorted(set([
+            sensor.collection.name if sensor.collection != non_collection else the_non_collection for sensor in Sensor.query.all()
+            if _chk_sens(sensor)
+        ]))
 
 api.add_resource(AxisHandler, '/axis', '/axis/')
 api.add_resource(CollectionHandler, '/collection', '/collection/', '/collection/<string:name>')

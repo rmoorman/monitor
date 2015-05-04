@@ -18,7 +18,7 @@ def index():
 
     return render_template(
         'index.html',
-        title='index',
+        title='monitor',
         shout_form=shout_form
     )
 
@@ -59,7 +59,6 @@ def atom_feed():
 @app.errorhandler(404)
 @app.errorhandler(500)
 def page_error(error):
-    print(request.endpoint)
     return render_template(
         'error.html',
         title='kaputt',

@@ -59,7 +59,7 @@ MAXCONC = 60 * 60 * 2
 AUTOREF_MIN = 30
 AUTOREF_MAX = 60
 
-LOGOS = ['evil_man.png', 'plug.png']
+LOGOS = ['evil_man.png', 'jack_plug.png']
 SPACE_LOGO = 'cccmz_logo.png'
 SPACE_OPEN = 'space_open.png'
 SPACE_CLOSED = 'space_closed.png'

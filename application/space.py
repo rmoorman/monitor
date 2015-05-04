@@ -1,3 +1,4 @@
+from random import choice
 from flask import url_for
 
 from application import app
@@ -20,18 +21,20 @@ def spaceapi():
                     scope = scope[field]
 
     def _sensor_elem(apisens, sensor):
-        val = sensor.get_data().first().num(fallback=False)
-        res = {
-            'description': sensor.description,
-            'location': sensor.description,
-            'name': sensor.name,
-            'value': val
-        }
-        if apisens == 'power_consumption':
-            res.update({'unit': 'W'})
-        if apisens == 'door_locked':
-            res.update({'value': not val})
-        return res
+        last = sensor.get_data().first()
+        if last:
+            val = last.num(fallback=False)
+            res = {
+                'description': sensor.description,
+                'location': sensor.description,
+                'name': sensor.name,
+                'value': val
+            }
+            if apisens == 'power_consumption':
+                res.update({'unit': 'W'})
+            if apisens == 'door_locked':
+                res.update({'value': not val})
+            return res
 
     conclusions = short_conclusions()
     shouts = get_shouts()
@@ -58,6 +61,7 @@ def spaceapi():
         last_shout.num(fallback=True) if last_shout else 'no shouts, sorry')
     )
 
+    _set_field(['contact', 'twitter'], choice(['@cccmz', '@cccmzwi']))
     _set_field(['icon', 'closed'], closed_url)
     _set_field(['icon', 'open'], open_url)
     _set_field(['logo'], logo_url)

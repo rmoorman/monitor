@@ -5,6 +5,14 @@ from sqlalchemy.ext.declarative import declared_attr
 from application import app, db
 
 
+def cliff():
+    return datetime.utcnow() - timedelta(seconds=app.config['MAXCONC'])
+
+
+def del_cliff():
+    return datetime.utcnow() - timedelta(seconds=app.config['MAXKEEP'])
+
+
 class BaseModel(object):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -77,8 +85,9 @@ class Sensor(BaseModel, db.Model):
         res.update(data_len=self.data.count())
         return res
 
-    def get_data(self):
-        return self.data.order_by(Data.time.desc())
+    def get_data(self, capped=False):
+        data = self.data.order_by(Data.time.desc())
+        return data.filter(Data.time > cliff()) if capped else data
 
     def flot_repr(self):
         return dict(
@@ -96,15 +105,16 @@ class Data(BaseModel, db.Model):
     sensor = db.relationship('Sensor', backref=db.backref('data', lazy='dynamic', order_by=time.desc(), cascade='all,delete'), post_update=True)
 
     def __init__(self, value, sensor):
+        for old in self.query.filter(Data.time < del_cliff()).all():
+            db.session.delete(old)
+
         self.time = datetime.utcnow()
-        cliff = self.time - timedelta(seconds=app.config['MAXKEEP'])
-        for dt in self.query.filter(Data.time < cliff):
-            db.session.delete(dt)
         self.value = value
         self.sensor = sensor
 
     def ms(self):
-        return int(1000 * (self.time - datetime.utcfromtimestamp(0)).total_seconds())
+        if self.time:
+            return int(1000 * (self.time - datetime.utcfromtimestamp(0)).total_seconds())
 
     def num(self, fallback=True):
         try:

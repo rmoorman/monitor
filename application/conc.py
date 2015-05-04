@@ -1,5 +1,4 @@
-from application.models import Collection, Data, Sensor
-from application.service import cliff
+from application.models import Collection, Sensor
 
 
 def _conv_and_calc(value, factor):
@@ -18,7 +17,7 @@ def short_conclusions():
     '''
     result = 0.0
     for sensor in Sensor.query.filter(Sensor.factor > 0.0).all():
-        last = sensor.get_data().filter(Data.time > cliff()).first()
+        last = sensor.get_data(capped=True).first()
         if last and last.value:
             res = _conv_and_calc(last.value, sensor.factor)
             if res:
@@ -37,7 +36,7 @@ def jump_to_conclusions_mat():
         csum = 0.0
         for sensor in Sensor.query.filter(Sensor.collection == collection).order_by(Sensor.name.asc()).all():
             ssum = None
-            last = sensor.get_data().filter(Data.time > cliff()).first()
+            last = sensor.get_data(capped=True).first()
             if last and last.value is not None:
                 ssum = _conv_and_calc(last.value, sensor.factor)
                 if ssum:

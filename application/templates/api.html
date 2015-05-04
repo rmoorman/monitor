@@ -252,7 +252,14 @@ echo $ERDSTRAHLEN
         {{ _listing([
             'Wird zur Anzeige des Graph benötigt.',
             'Liefert als Übersicht eine Liste von Collections (und ggf. __v' ~ the_non_collection ~ 'v__) für die einzelnen Tabs.',
-            'Als Details wird Data aller Sensoren der Collection in Graph-Kompatibel geliefert.'
+            'Als Details wird Data aller Sensoren der Collection in Graph-Kompatibel geliefert.',
+            'Es werden nur Collections gelistet, die Sensoren folgender Kriterien enthalten:',
+            '<ul>
+                <li>Es ist bereits Data vorhanden,</li>
+                <li>Es wurde eine Unit zugewiesen,</li>
+                <li>Die Axis der Unit ist __v' ~ the_axis|list|join('v__ oder __v') ~ 'v__.</li>
+            </ul>',
+            'Im Status sind diese aber vorhanden.'
         ]) }}
     % endcall
 
@@ -310,7 +317,7 @@ echo $ERDSTRAHLEN
         {{ _listing([
             'Bei den "_' ~ the_shouts ~ '" handelt es sich um die Nachrichten unterhalb vom Graph.',
             'Der Sensor hat den Namen __v' ~ the_shouts ~ 'v__, mit der Unit __v' ~ the_shouts ~ 'v__, und liegt in der Collection __v' ~ the_service_collection ~ 'v__.',
-            'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf des Feeds oder der SpaceAPI automatisch erstellt.'
+            'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf des Feeds, der SpaceAPI oder von Data mit dem parameter __vsensor=' ~ the_shouts ~ 'v__ automatisch erstellt.'
         ]) }}
     % endcall
 
@@ -336,7 +343,7 @@ if [ $ERDSTRAHLEN -eq 1337 ]; then
             'Es ist die Differenz der aufgerufenen URL vom Status zum tatsächlichen Wert des Status.',
             'Beim Expliziten Aufruf der URL __v[ ' ~ url_for('api') ~ ' ]' ~ url_for('conc', cc=0) ~ 'v__ bzw. __v[ ' ~ url_for('api') ~ ' ]' ~ url_for('conc')|replace('%25', '') ~ '%v__ wird das ganze übersprungen.',
             'Der Sensor hat den Namen __v' ~ the_variation ~ 'v__, mit der Unit __v' ~ the_variation_unit ~ 'v__, und liegt in der Collection __v' ~ the_service_collection ~ 'v__.',
-            'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf (mit abweichendem Wert) des Status automatisch erstellt.'
+            'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf des Status oder von Data mit dem parameter __vsensor=' ~ the_variation ~ 'v__ automatisch erstellt.'
         ]) }}
     % endcall
 

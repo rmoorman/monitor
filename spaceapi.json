@@ -66,9 +66,10 @@
         "schedule": "m.05"
     },
     "projects": [
+        "http://fnordfunk.de/",
         "https://fnord.cccmz.de/",
-        "https://github.com/cccmzwi/",
-        "https://git.cccmz.de/"
+        "https://git.cccmz.de/",
+        "https://github.com/cccmzwi/"
     ],
     "open": null,
     "icon": {
