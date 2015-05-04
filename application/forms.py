@@ -10,7 +10,7 @@ from application.service import get_shouts
 
 class ShoutForm(Form):
     shout = StringField('nachricht', validators=[InputRequired('Inhalt fehlt!'), Length(min=5, max=142, message='Mindestens %(min)d, maximal %(max)d Zeichen')])
-    save = SubmitField('los')
+    save = SubmitField('ok')
 
 
 def handle_shout(form):

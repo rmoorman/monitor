@@ -135,25 +135,21 @@ class SensorHandler(Resource):
 
 
 class DataHandler(Resource):
-    def _rtrv_sensor(self, name):
-        sensor = None
-        if name == the_shouts:
-            sensor = get_shouts()
-        elif name == the_variation:
-            sensor = get_variation()
-        else:
-            sensor = retrieve_dbo(Sensor, name)
-        return sensor
+    def _service_env(self, name):
+        get_shouts() if name == the_shouts else None
+        get_variation() if name == the_variation else None
 
     def get(self, sensorname=None):
         if sensorname:
-            return [data.api_repr() for data in self._rtrv_sensor(sensorname).get_data().all()]
+            self._service_env(sensorname)
+            return [data.api_repr(as_num=True if sensorname != the_shouts else False) for data in retrieve_dbo(Sensor, sensorname).get_data().all()]
         abort(400, error='please specify a sensor')
 
     @requires_auth
     def post(self, sensorname=None):
         a = _get_input(['value', 'sensor'])
-        data = Data(a.get('value'), self._rtrv_sensor(a.get('sensor')))
+        self._service_env(sensorname)
+        data = Data(a.get('value'), retrieve_dbo(Sensor, a.get('sensor')))
         db.session.add(data)
         db.session.commit()
 

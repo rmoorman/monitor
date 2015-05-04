@@ -58,7 +58,7 @@ def spaceapi():
     last_shout = shouts.get_data().first()
     _set_field(['state', 'message'], '{}% chance someone is there! last message: \'{}\''.format(
         conclusions,
-        last_shout.num(fallback=True) if last_shout else 'no shouts, sorry')
+        last_shout.value if last_shout else 'no shouts, sorry')
     )
 
     _set_field(['contact', 'twitter'], choice(['@cccmz', '@cccmzwi']))

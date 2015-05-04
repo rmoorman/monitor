@@ -1,13 +1,9 @@
-% macro atom()
-    &#x2622;
-% endmacro
-
 % macro dot()
     &bull;
 % endmacro
 
-% macro dash()
-    &mdash;
+% macro spacer()
+    <div class="group text-centered">{{ dot() }}</div>
 % endmacro
 
 % macro set_conc(conc=None)
@@ -61,15 +57,35 @@
     <div class="units-row">
         <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">
             {{ form.csrf_token() }}
-            <div class="input-groups width-100 pause">
-                <span class="text-centered">{{ form.shout.label }}</span>
-                % for error in form.errors.shout
-                <span class="error">{{ error }}</span>
-                % endfor
+            <div class="input-groups width-100">
+                <code id="counter" class="input-prepend fa fa-hand-o-right"></code>
                 {{ form.shout(placeholder='schreib was!') }}
+                <span class="btn-append">
+                    {{ form.save(class='btn') }}
+                </span>
             </div>
-            {{ form.save(class='btn right') }}
+            % for error in form.errors.shout
+                <span class="error">{{ error }}</span>
+            % endfor
         </form>
     </div>
+    <script>
+        $('#shout').on('keyup focusin', function()
+        {
+            len = $('#shout').val().length
+            if (len <= 5 || len >= 142)
+            {
+                $('#counter').removeClass('fa-hand-o-right').addClass('fa-strikethrough');
+            } else
+            {
+                $('#counter').removeClass('fa-strikethrough').addClass('fa-hand-o-right');
+            }
+            $('#counter').text(' ' + (len < 10 ? '0' + len: len));
+        });
+        $('#shout').focusout(function()
+        {
+            $('#counter').removeClass('fa-strikethrough').addClass('fa-hand-o-right').text('');
+        });
+    </script>
     % endif
 % endmacro

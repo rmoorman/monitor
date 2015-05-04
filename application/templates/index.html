@@ -90,7 +90,7 @@
                     });
                     $('#legend_elems').text('');
 
-                    $('#plot').bind('plotclick plothover', function (event, pos, item)
+                    $('#plot').on('plotclick plothover', function (event, pos, item)
                     {
                         if (pos !== undefined && pos !== null)
                         {
@@ -195,7 +195,7 @@
     <script>
     $(function ()
     {
-        var timer;
+        var shout_timer;
         var wdh = 3;
 
         function load()
@@ -208,24 +208,23 @@
                 $.each(shouts, function (i, shout)
                 {
                     var elem = (i - (i % wdh));
-                    var block = ((i % wdh) != 0) ? $('#block_'+elem) : $('<ul/>',
+                    var block = ((i % wdh) != 0) ? $('#block_'+elem) : $('<div/>',
                     {
                         id: 'block_'+elem,
-                        class: 'blocks-'+wdh
+                        class: 'units-row end'
                     });
 
-                    block.append($('<li/>').append($('<div/>',
-                    {
-                        class: 'group'
+                    block.append($('<div/>', {
+                        class: 'unit-33',
+                        id: '{{ the_shouts }}_' + shout.time
                     }).on('click', function (cl)
                     {
-                        $('#delete_'+i).fadeIn('fast');
-                    }).append($('<big/>',
+                        $('#delete_'+i).addClass('fa fa-trash-o');
+                    }).append($('<a/>',
                     {
+                        class: 'left error',
                         id: 'delete_'+i,
-                        class: 'left error hide',
-                        title: 'delete',
-                        text: '✗',
+                        title: 'delete'
                     }).on('click', function (cl)
                     {
                         api_query('{{ url_for('api') }}/data/{{ the_shouts }}', load, 'DELETE', {
@@ -235,26 +234,27 @@
                         {
                             $('#toggle_'+i).addClass('error');
                             $('#toggle_'+i).text(err + ' - ' + eex);
-                            $('#delete_'+i).fadeOut('slow');
+                            $('#delete_'+i).removeClass('fa fa-trash-o');
                         });
                     })).append($('<blockquote/>',
                     {
                         class: 'end',
+                        style: 'word-wrap: break-word;',
                         text: shout.value
-                    })).append($('<span/>',
+                    })).append($('<cite/>',
                     {
                         id: 'toggle_'+i,
                         class: 'small left',
                         text: reltime_fmt(shout.time)
-                    }))));
+                    })));
 
                     $('#{{ the_shouts }}').append(block);
                 });
             }
 
             api_query('{{ url_for('api') }}/data/{{ the_shouts }}', reload);
-            clearInterval(timer);
-            timer = setInterval(function() {
+            clearInterval(shout_timer);
+            shout_timer = setInterval(function() {
                 load();
             }, refresh_seconds());
         }

@@ -2,6 +2,7 @@
 
 % block content
     % from 'macros.html' import time_format, reltime_format
+
     % macro _endpoint(url, method, data=none)
         <table class="table-flat table-hovered">
             <tr>
@@ -19,6 +20,7 @@
         </table>
     % endmacro
 
+
     % macro _curl(url, method, data=none, pre=false, ident='')
 {{ ident }}curl{{ ' -u "user:pass"' if method != 'GET' }} -X {{ method }} {{ url_for('api', _external=true) }}/{{ url }}{{ ' \\' if pre and data }}
 % if data
@@ -28,8 +30,11 @@
 % endif
     % endmacro
 
+
     % macro _hartmann_gitter()
-        <pre class="width-75 unit-centered"><code>
+    <div class="units-row end">
+<div class="text-centered"><span class="fa fa-code"></span></div>
+<pre class="unit-75 unit-centered"><code>
 #!/bin/bash
 
 ERDSTRAHLEN=$(python3 -c "from random import choice; print(choice(range(0, 1+1337)))")
@@ -41,7 +46,9 @@ echo $ERDSTRAHLEN
 
 % endif
 </code></pre>
+    </div>
     % endmacro
+
 
     % macro _segment(name, endpoints)
         <hr />
@@ -49,13 +56,16 @@ echo $ERDSTRAHLEN
         % if caller
             {{ caller() }}
         % endif
+        % if endpoints
         <div class="units-row end">
             <div class="unit-50">
+                <div class="text-centered"><span class="fa fa-sliders"></span></div>
                 % for (url, method, data, description) in endpoints
                     {{ _endpoint(url, method, data) }}
                 % endfor
             </div>
             <div class="unit-50">
+                <div class="text-centered"><span class="fa fa-terminal"></span></div>
                 % for (url, method, data, description) in endpoints
                     <div class="group pause">
                         {{ description }}
@@ -64,7 +74,9 @@ echo $ERDSTRAHLEN
                 % endfor
             </div>
         </div>
+        % endif
     % endmacro
+
 
     % macro _listing(elems)
         <ul>
@@ -111,6 +123,7 @@ echo $ERDSTRAHLEN
             % endfor
         </ul>
     % endmacro
+
 
     <h2 class="text-centered">api</h2>
     Im vorliegendem Beispielfall haben wir eine Datenquelle, die kontinuierlich die Erdstrahlenbelastung vor Ort misst:

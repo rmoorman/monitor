@@ -99,6 +99,7 @@ def handle_variation(given, expected):
 
 app.jinja_env.globals.update(the_autoref_max=1000*app.config['AUTOREF_MAX'])
 app.jinja_env.globals.update(the_autoref_min=1000*app.config['AUTOREF_MIN'])
+app.jinja_env.globals.update(the_footer_links=app.config['FOOTER_LINKS'])
 app.jinja_env.globals.update(the_axis=the_axis)
 app.jinja_env.globals.update(the_cliff=the_cliff)
 app.jinja_env.globals.update(the_del_cliff=the_del_cliff)

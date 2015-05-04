@@ -68,3 +68,9 @@ SPACE_SENSORS = {
     'power_consumption': ['flukso'],
     'door_locked': ['glassdoor', 'backdoor']
 }
+
+FOOTER_LINKS = {
+    'monitor': 'https://github.com/spookey/monitor',
+    'watcher': 'https://github.com/spookey/watcher',
+    'watcher_modules': 'https://github.com/spookey/watcher_modules'
+}

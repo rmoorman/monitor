@@ -3,34 +3,39 @@
 SDIR=$(cd "$(dirname "$0")"; pwd)
 BDIR=$(cd "$(dirname "$0")/.."; pwd)
 
-SPATH="$BDIR/application/static"
 IPATH="$SDIR/static"
+SPATH="$BDIR/application/static"
 
-mkdir -p "$SPATH/js" "$SPATH/css"
+wget -P "$IPATH" http://code.jquery.com/jquery-2.1.3.min.js
+wget -P "$IPATH" http://fortawesome.github.io/Font-Awesome/assets/font-awesome-4.3.0.zip
+wget -P "$IPATH" --default-page=kube.zip  http://imperavi.com/webdownload/kube/get/
+wget -P "$IPATH" http://momentjs.com/downloads/moment-with-locales.min.js
+wget -P "$IPATH" http://www.flotcharts.org/downloads/flot-0.8.3.zip
 
-wget --default-page=kube.zip -P "$SPATH" http://imperavi.com/webdownload/kube/get/
-wget -P "$SPATH" http://www.flotcharts.org/downloads/flot-0.8.3.zip
-wget -P "$SPATH" http://momentjs.com/downloads/moment-with-locales.min.js
-wget -P "$SPATH" http://code.jquery.com/jquery-2.1.3.min.js
+unzip -j -d "$IPATH" "$IPATH/flot*zip" "*jquery.flot*.min.js"
+unzip -j -d "$IPATH" "$IPATH/font-awesome*zip" "*.min.css" "*-webfont*"
+unzip -j -d "$IPATH" "$IPATH/kube*zip" "*.min.*"
 
-unzip -j -d "$SPATH" "$SPATH/kube.zip" *.min.*
-unzip -j -d "$SPATH" "$SPATH/flot-0.8.3.zip" *jquery.flot*.min.js
+mkdir -p "$SPATH/css" "$SPATH/fonts" "$SPATH/js"
 
-for jsf in "$SPATH/*.js"; do
-    mv $jsf "$SPATH/js"
-done
-for csf in "$SPATH/*.css"; do
-    mv $csf "$SPATH/css"
-done
+mv "$IPATH"/*.css "$SPATH/css"
+mv "$IPATH/"*.{eot,svg,ttf,woff2,woff} "$SPATH/fonts"
+mv "$IPATH"/*.js "$SPATH/js"
+cp "$IPATH/"*.png "$SPATH"
+rm "$IPATH/"*.zip*
 
-for zsf in "$SPATH/*.zip*"; do
-    rm $zsf
-done
-
-for psf in "$IPATH/*.png"; do
-    cp $psf $SPATH
-done
-
-ls $SPATH
+echo '--'
+echo '--'
+echo '/'
+ls "$SPATH"
+echo '--'
+echo '/css'
 ls "$SPATH/css"
+echo '--'
+echo '/fonts'
+ls "$SPATH/fonts"
+echo '--'
+echo '/js'
 ls "$SPATH/js"
+echo '--'
+echo '--'
