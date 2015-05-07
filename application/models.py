@@ -76,18 +76,23 @@ class Sensor(BaseModel, db.Model):
         self.unit = unit
         self.factor = factor
 
-    def api_repr(self):
+    def get_data(self, capped=False):
+        data = self.data.order_by(Data.time.desc())
+        return data.filter(Data.time > cliff()) if capped else data
+
+    def api_repr(self, as_num=True):
         res = self.show()
         if self.collection:
             res.update(collection=self.collection.name)
         if self.unit:
             res.update(unit=self.unit.name)
+            res.update(unit_axis=self.unit.axis)
         res.update(data_len=self.data.count())
+        latest = self.get_data().first()
+        if latest:
+            res.update(data_latest=latest.api_repr(as_num))
+            res.update(data_fresh=(latest.time > cliff()))
         return res
-
-    def get_data(self, capped=False):
-        data = self.data.order_by(Data.time.desc())
-        return data.filter(Data.time > cliff()) if capped else data
 
     def flot_repr(self):
         return dict(

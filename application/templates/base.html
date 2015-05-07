@@ -1,4 +1,4 @@
-% from 'macros.html' import dot, spacer, set_conc
+% from 'macros.html' import stroke, spacer, set_conc
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -87,33 +87,35 @@
         title = title.replace('{{ conclusions[0] }}%', '%%%');
         % endif
 
-        function load_conc()
+        function run_conc()
         {
-            function set_conc(val)
+            function conc_callback(val)
             {
-                $('.conc').html($('<a/>',
-                {
-                    href: '{{ hurl }}'.replace('{{ guess }}', val),
-                    text: val + '%'
-                }).hover(function (hv)
-                {
-                    $.progress.update(val);
-                }));
+                $('.conc').html(
+                    $('<a/>',
+                    {
+                        href: '{{ hurl }}'.replace('{{ guess }}', val),
+                        text: val + '%'
+                    }).hover(function (hv)
+                    {
+                        $.progress.update(val);
+                    })
+                );
 
                 $.progress.hide();
                 $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
                 guess = val;
             }
 
-            api_query('{{ url_for('api') }}/' + guess, set_conc);
+            api_query('{{ url_for('api') }}/' + guess, conc_callback);
             clearInterval(conc_timer);
             conc_timer = setInterval(function()
             {
-                load_conc();
+                run_conc();
             }, refresh_seconds());
         }
 
-        load_conc();
+        run_conc();
         % endcall
     </script>
     % block header
@@ -155,12 +157,12 @@
                 % for message in messages
                     <li>{{ message }}</li>
                     % if not loop.last
-                    <li class="error">{{ dot() }}</li>
+                    <li class="error">{{ stroke() }}</li>
                     % endif
                 % endfor
                 % endwith
-                <li><var id="loader" class="hide">{{ dot() }}</var>&nbsp;</li>
-                <li><span class="time">{{ dot() }}</span></li>
+                <li><var id="loader" class="hide">{{ stroke() }}</var>&nbsp;</li>
+                <li><span class="time">{{ stroke() }}</span></li>
                 <li><a href="{{ url_for('api') }}">api</a></li>
                 <li class="big"><h1>{{ set_conc(conclusions) }}</h1></li>
             </ul>
@@ -180,30 +182,26 @@
 {{ spacer() }}
 
 <footer class="units-row end">
-    <div class="unit-100 unit-centered">
-        <nav class="nav fullwidth end">
-            <ul>
-                <li><a href="{{ url_for('index') }}" class="time">{{ dot() }}</a></li>
-                <li><a href="{{ url_for('index', _anchor='cycle') }}"
-                % if request.endpoint == 'index'
-                    target="_blank"
-                % endif
-                ><i class="fa fa-spinner"></i></a></li>
-                <li><a href="{{ url_for('api') }}"><i class="fa fa-paper-plane-o"></i></a></li>
-                <li><a href="{{ url_for('atom_feed', _external=True) }}" rel="alternate" title="monitor - {{ the_shouts }} feed" type="application/atom+xml"><i class="fa fa-rss"></i></a></li>
-                <li class="big">{{ set_conc(conclusions) }}</li>
-            </ul>
-        </nav>
-    </div>
-    <div class="unit-100 unit-centered">
-        <nav class="nav fullwidth small end">
-            <ul>
-                % for (name, url) in the_footer_links|dictsort
-                <li class="text-centered"><a href="{{ url }}">{{ name }}</a></li>
-                % endfor
-            </ul>
-        </nav>
-    </div>
+    <nav class="nav fullwidth end">
+        <ul>
+            <li><a href="{{ url_for('index', _anchor='cycle') }}"
+            % if request.endpoint == 'index'
+                target="_blank"
+            % endif
+            ><i class="fa fa-spinner"></i></a></li>
+            <li><a href="{{ url_for('api') }}"><i class="fa fa-paper-plane-o"></i></a></li>
+            <li><a href="{{ url_for('atom_feed', _external=True) }}" rel="alternate" title="monitor - {{ the_shouts }} feed" type="application/atom+xml"><i class="fa fa-rss"></i></a></li>
+            <li class="big">{{ set_conc(conclusions) }}</li>
+        </ul>
+    </nav>
+    <nav class="nav fullwidth small end">
+        <ul>
+            % for (name, url) in the_footer_links|dictsort
+            <li class="text-centered"><a href="{{ url }}">{{ name }}</a></li>
+            % endfor
+            <li><a href="{{ url_for('index') }}" class="time">{{ stroke() }}</a></li>
+        </ul>
+    </nav>
 </footer>
 
 </body>

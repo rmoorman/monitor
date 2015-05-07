@@ -82,7 +82,7 @@ def get_variation():
         the_variation,
         axis=1,
         factor=0.0,
-        sensor_description='Erdstrahlenberechnung im Hartmann-Gitter',
+        sensor_description='Erdstrahlenerfassung im Hartmann-Gitter',
         unit_description='Erdstrahlenbelastung in Bovis',
     )
 

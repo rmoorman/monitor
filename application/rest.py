@@ -50,6 +50,11 @@ def _get_input(req, opt=None):
     return cargs
 
 
+def _ensure_service_env(name):
+        get_shouts() if name == the_shouts else None
+        get_variation() if name == the_variation else None
+
+
 class AxisHandler(Resource):
     def get(self):
         return the_axis
@@ -91,19 +96,34 @@ class UnitHandler(Resource):
 
 class CollectionHandler(Resource):
     def get(self, name=None):
+        non_collection = None
+        non_sensors = Sensor.query.filter(Sensor.collection == non_collection)
         if name:
-            return retrieve_dbo(Collection, name).api_repr()
-        return [c.name for c in Collection.query.all()]
+            if name != the_non_collection:
+                return retrieve_dbo(Collection, name).api_repr()
+            return {
+                'description': 'The Non-Collection',
+                'name': the_non_collection,
+                'sensors': [s.name for s in non_sensors.all()]
+            }
+
+        res = [c.name for c in Collection.query.all()]
+        return sorted(res + [the_non_collection] if non_sensors.count() else res)
 
     @requires_auth
     def post(self, name=None):
         a = _get_input(['name', 'sensors'])
-        collection = retrieve_dbo(Collection, a.get('name'), create=True)
-        description = a.get('description')
-        if description:
-            collection.description = description
+        collection = None
+        if a.get('name') != the_non_collection:
+            collection = retrieve_dbo(Collection, a.get('name'), create=True)
+            description = a.get('description')
+            if description:
+                collection.description = description
+
         for s in a.get('sensors', []):
             sensor = retrieve_dbo(Sensor, s)
+            if a.get('name') == the_non_collection:
+                sensor.collection_id = None
             sensor.collection = collection
             db.session.add(sensor)
         db.session.commit()
@@ -114,12 +134,14 @@ class CollectionHandler(Resource):
 class SensorHandler(Resource):
     def get(self, name=None):
         if name:
-            return retrieve_dbo(Sensor, name).api_repr()
+            _ensure_service_env(name)
+            return retrieve_dbo(Sensor, name).api_repr(as_num=True if name != the_shouts else False)
         return [s.name for s in Sensor.query.all()]
 
     @requires_auth
     def post(self, name=None):
         a = _get_input(['name', 'unit'])
+        _ensure_service_env(a.get('name'))
         unit = retrieve_dbo(Unit, a.get('unit'))
         sensor = retrieve_dbo(Sensor, a.get('name'), create=unit)
         sensor.unit = unit
@@ -135,20 +157,16 @@ class SensorHandler(Resource):
 
 
 class DataHandler(Resource):
-    def _service_env(self, name):
-        get_shouts() if name == the_shouts else None
-        get_variation() if name == the_variation else None
-
     def get(self, sensorname=None):
         if sensorname:
-            self._service_env(sensorname)
+            _ensure_service_env(sensorname)
             return [data.api_repr(as_num=True if sensorname != the_shouts else False) for data in retrieve_dbo(Sensor, sensorname).get_data().all()]
         abort(400, error='please specify a sensor')
 
     @requires_auth
     def post(self, sensorname=None):
         a = _get_input(['value', 'sensor'])
-        self._service_env(sensorname)
+        _ensure_service_env(a.get('sensor'))
         data = Data(a.get('value'), retrieve_dbo(Sensor, a.get('sensor')))
         db.session.add(data)
         db.session.commit()
@@ -162,10 +180,10 @@ class DataHandler(Resource):
         if not data:
             abort(400, error='given value is unknown', value=a.get('value'))
         # there can be multiple data with the same value
-        if not any([d for d in data if str(d.ms()) == a.get('time')]):
+        if not any([
+            (d, db.session.delete(d))[0] for d in data if str(d.ms()) == a.get('time')
+        ]):
             abort(400, error='given time does not match', time=a.get('time'))
-        for dt in [d for d in data if str(d.ms()) == a.get('time')]:
-            db.session.delete(dt)
         db.session.commit()
 
         return a

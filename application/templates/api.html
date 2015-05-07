@@ -1,136 +1,14 @@
 % extends 'base.html'
 
 % block content
-    % from 'macros.html' import time_format, reltime_format
-
-    % macro _endpoint(url, method, data=none)
-        <table class="table-flat table-hovered">
-            <tr>
-                <th class="width-40 text-left"><code>{{ url_for('api') }}/{{ url }}</code></th>
-                <th class="width-60 text-right">{{ method }}</th>
-            </tr>
-            % if data
-            % for (field, sample) in data
-                <tr>
-                    <th class="width-40 text-left"><var>{{ field }}</var></th>
-                    <td class="width-60 text-centered">{{ sample }}</td>
-                </tr>
-            % endfor
-            % endif
-        </table>
-    % endmacro
-
-
-    % macro _curl(url, method, data=none, pre=false, ident='')
-{{ ident }}curl{{ ' -u "user:pass"' if method != 'GET' }} -X {{ method }} {{ url_for('api', _external=true) }}/{{ url }}{{ ' \\' if pre and data }}
-% if data
-% for (field, sample) in data
-{{ ident ~ '\t' }}-d {{ field }}={{ sample }}{{ ' \\' if pre and not loop.last }}
-% endfor
-% endif
-    % endmacro
-
-
-    % macro _hartmann_gitter()
-    <div class="units-row end">
-<div class="text-centered"><span class="fa fa-code"></span></div>
-<pre class="unit-75 unit-centered"><code>
-#!/bin/bash
-
-ERDSTRAHLEN=$(python3 -c "from random import choice; print(choice(range(0, 1+1337)))")
-
-% if caller
-{{ caller() }}
-% else
-echo $ERDSTRAHLEN
-
-% endif
-</code></pre>
-    </div>
-    % endmacro
-
-
-    % macro _segment(name, endpoints)
-        <hr />
-        <h3 id="{{ name|lower }}"><a>{{ name }}</a></h3>
-        % if caller
-            {{ caller() }}
-        % endif
-        % if endpoints
-        <div class="units-row end">
-            <div class="unit-50">
-                <div class="text-centered"><span class="fa fa-sliders"></span></div>
-                % for (url, method, data, description) in endpoints
-                    {{ _endpoint(url, method, data) }}
-                % endfor
-            </div>
-            <div class="unit-50">
-                <div class="text-centered"><span class="fa fa-terminal"></span></div>
-                % for (url, method, data, description) in endpoints
-                    <div class="group pause">
-                        {{ description }}
-                        <code class="width-100">{{ _curl(url, method, data) }}</code>
-                    </div>
-                % endfor
-            </div>
-        </div>
-        % endif
-    % endmacro
-
-
-    % macro _listing(elems)
-        <ul>
-            % for elem in elems
-            % with cliff = time_format(the_cliff()) + ' (' + reltime_format(the_cliff()) ~ ')'
-            % with del_cliff = time_format(the_del_cliff()) + ' (' + reltime_format(the_del_cliff()) ~ ')'
-            <li>{{
-                elem|replace(
-                    'Unit', '<a class="bold" href="' ~ url_for('api', _anchor='unit') ~ '">Unit</a>'
-                )|replace(
-                    'Axis', '<a class="bold" href="' ~ url_for('api', _anchor='axis') ~ '">Axis</a>'
-                )|replace(
-                    'Sensor', '<a class="bold" href="' ~ url_for('api', _anchor='sensor') ~ '">Sensor</a>'
-                )|replace(
-                    'Data', '<a class="bold" href="' ~ url_for('api', _anchor='data') ~ '">Data</a>'
-                )|replace(
-                    'Collection', '<a class="bold" href="' ~ url_for('api', _anchor='collection') ~ '">Collection</a>'
-                )|replace(
-                    'SpaceAPI', '<a class="bold" href="' ~ url_for('api', _anchor='spaceapi') ~ '">SpaceAPI</a>'
-                )|replace(
-                    'Feed', '<a class="bold" href="' ~ url_for('atom_feed') ~ '">Feed</a>'
-                )|replace(
-                    'Status', '<a href="' ~ url_for('conc', cc=0) ~ '">Status</a>'
-                )|replace(
-                    'Graph', '<a href="' ~ url_for('index') ~ '">Graph</a>'
-                )|replace(
-                    '__v', '<var>'
-                )|replace(
-                    'v__', '</var>'
-                )|replace(
-                    '__s', '<small>'
-                )|replace(
-                    's__', '</small>'
-                )|replace(
-                    '_' ~ the_shouts , '<a href="' ~ url_for('index', _anchor=the_shouts) ~ '">' ~ the_shouts ~ '</a>'
-                )|safe|replace(
-                    '__cliff', cliff
-                )|replace(
-                    '__dcliff', del_cliff
-                )|safe
-            }}</li>
-            % endwith
-            % endwith
-            % endfor
-        </ul>
-    % endmacro
-
+    % from 'macros.html' import time_format, reltime_format, render_hartmann_gitter, render_curl_line, render_api_listing, render_api_segment
 
     <h2 class="text-centered">api</h2>
     Im vorliegendem Beispielfall haben wir eine Datenquelle, die kontinuierlich die Erdstrahlenbelastung vor Ort misst:
 
-    {{ _hartmann_gitter() }}
+    {{ render_hartmann_gitter() }}
 
-    % call _segment(
+    % call render_api_segment(
         'Unit',
         [
             ('unit', 'GET', none, 'Übersicht'),
@@ -142,13 +20,13 @@ echo $ERDSTRAHLEN
             ], 'Schreiben'),
         ]
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Bevor man einen Sensor erstellen kann, muss eine Unit existieren.',
             'Möchte man Data eines Sensors aus dem Graph ausschließen, wählt man hier als Axis die __v0v__.'
         ]) }}
     % endcall
 
-    % call _segment(
+    % call render_api_segment(
         'Axis',
         [
             ('axis', 'GET', none, 'Übersicht'),
@@ -156,7 +34,7 @@ echo $ERDSTRAHLEN
     )
         <ul class="blocks-2">
             <li>
-                {{ _listing([
+                {{ render_api_listing([
                     'Die Axis einer Unit bestimmt auf welcher y-Achse Data eines Sensors im Graph angezeigt und deren Werte formatiert werden.'
                 ]) }}
             </li>
@@ -177,7 +55,7 @@ echo $ERDSTRAHLEN
         </ul>
     % endcall
 
-    % call _segment(
+    % call render_api_segment(
         'Sensor',
         [
             ('sensor', 'GET', none, 'Übersicht'),
@@ -190,7 +68,7 @@ echo $ERDSTRAHLEN
             ], 'Schreiben')
         ]
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Ohne Sensor kann nicht nach Data geschrieben werden.',
             'Ein Sensor existiert immer in Abhängigkeit zu einer Unit.',
             'Mehrere Sensoren können in Collections gruppiert werden.',
@@ -200,7 +78,7 @@ echo $ERDSTRAHLEN
 
     % with cliff = the_cliff()
     % with del_cliff = the_del_cliff()
-    % call _segment(
+    % call render_api_segment(
         'Data',
         [
             ('data/erdstrahlen', 'GET', none, 'Details'),
@@ -214,7 +92,7 @@ echo $ERDSTRAHLEN
             ], 'Löschen')
         ]
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Data lässt sich nur unter Angabe eines Sensors schreiben.',
             'Zeit ist immer in __vutcv__ und wird der api in __vmsv__ angegeben: ( z.B. __v' ~ del_cliff ~ 'v__ )',
             'Vor dem Schreiben werden Einträge älter als der __dcliff gelöscht.',
@@ -226,8 +104,8 @@ echo $ERDSTRAHLEN
     % endwith
 
     Das Script das regelmäßig läuft sieht nun so aus:
-    % call _hartmann_gitter()
-{{ _curl(
+    % call render_hartmann_gitter()
+{{ render_curl_line(
     'data', 'POST', [
         ('name', '"' ~ the_variation ~ '"'),
         ('value', '$ERDSTRAHLEN')
@@ -236,7 +114,7 @@ echo $ERDSTRAHLEN
 ) }}
     % endcall
 
-    % call _segment(
+    % call render_api_segment(
         'Collection',
         [
             ('collection', 'GET', none, 'Übersicht'),
@@ -249,20 +127,20 @@ echo $ERDSTRAHLEN
             ], 'Schreiben'),
         ]
     )
-        {{ _listing([
+        {{ render_api_listing([
             'In einer Collection können Sensoren gruppiert werden.',
             'Wurde einem Sensor noch keine Collection zugeordnet so erscheint er im Graph und im Status unter __v' ~ the_non_collection ~ 'v__.'
         ]) }}
     % endcall
 
-    % call _segment(
+    % call render_api_segment(
         'Graph',
         [
             ('graph', 'GET', none, 'Übersicht'),
             ('graph/' ~ the_service_collection, 'GET', none, 'Details')
         ]
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Wird zur Anzeige des Graph benötigt.',
             'Liefert als Übersicht eine Liste von Collections (und ggf. __v' ~ the_non_collection ~ 'v__) für die einzelnen Tabs.',
             'Als Details wird Data aller Sensoren der Collection in Graph-Kompatibel geliefert.',
@@ -277,14 +155,14 @@ echo $ERDSTRAHLEN
     % endcall
 
     % with guess = range(0, 99)|random
-    % call _segment(
+    % call render_api_segment(
         '%',
         [
             ('%', 'GET', none, 'Details'),
             (guess ~ '%', 'GET', none, 'Details')
         ]
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Gibt den ermittelten Wert des Status zurück.',
             'Wird genutzt um den Status im Titel zu aktualisieren.',
         ]) }}
@@ -292,7 +170,7 @@ echo $ERDSTRAHLEN
     % endwith
 
     % with hs_base = 'https://spaceapi.net/documentation'
-    % call _segment(
+    % call render_api_segment(
         'SpaceAPI',
         [
             ('space', 'GET', none, 'Details')
@@ -300,7 +178,7 @@ echo $ERDSTRAHLEN
     )
         <ul class="blocks-2">
             <li>
-                {{ _listing([
+                {{ render_api_listing([
                     'Die Anbindung and die <a href="' ~ hs_base ~ '">HackerspaceAPI</a>.',
                     'Dort werden Werte der Sensoren mit eingebunden, falls diese existieren und Data dazu vorliegt.'
                 ]) }}
@@ -323,11 +201,11 @@ echo $ERDSTRAHLEN
     % endcall
     % endwith
 
-    % call _segment(
+    % call render_api_segment(
         the_shouts,
         []
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Bei den "_' ~ the_shouts ~ '" handelt es sich um die Nachrichten unterhalb vom Graph.',
             'Der Sensor hat den Namen __v' ~ the_shouts ~ 'v__, mit der Unit __v' ~ the_shouts ~ 'v__, und liegt in der Collection __v' ~ the_service_collection ~ 'v__.',
             'Die dazu benötigte Umgebung (Sensor, Unit, Collection) wird beim ersten Aufruf des Feeds, der SpaceAPI oder von Data mit dem parameter __vsensor=' ~ the_shouts ~ 'v__ automatisch erstellt.'
@@ -335,9 +213,9 @@ echo $ERDSTRAHLEN
     % endcall
 
     Zum Beispiel lassen sich {{ the_shouts }} bei bestimmten Ereignissen auch per api pushen:
-    % call _hartmann_gitter()
+    % call render_hartmann_gitter()
 if [ $ERDSTRAHLEN -eq 1337 ]; then
-{{ _curl(
+{{ render_curl_line(
     'data', 'POST', [
         ('sensor', '"' ~ the_shouts ~ '"'),
         ('value', '"Erdstrahlen Overload! Sofort evakuieren!!1!"')
@@ -347,11 +225,11 @@ if [ $ERDSTRAHLEN -eq 1337 ]; then
 ) }}fi
     % endcall
 
-    % call _segment(
+    % call render_api_segment(
         the_variation,
         []
     )
-        {{ _listing([
+        {{ render_api_listing([
             'Bei den "' ~ the_variation ~ '" handelt es sich nicht um das oben beschriebene Script. __s(Nein! Doch!! Ohhh!!!)s__',
             'Es ist die Differenz der aufgerufenen URL vom Status zum tatsächlichen Wert des Status.',
             'Beim Expliziten Aufruf der URL __v[ ' ~ url_for('api') ~ ' ]' ~ url_for('conc', cc=0) ~ 'v__ bzw. __v[ ' ~ url_for('api') ~ ' ]' ~ url_for('conc')|replace('%25', '') ~ '%v__ wird das ganze übersprungen.',

@@ -1,9 +1,11 @@
-% macro dot()
-    &bull;
+### base macros
+
+% macro stroke()
+    <i class="fa fa-minus"></i>
 % endmacro
 
 % macro spacer()
-    <div class="group text-centered">{{ dot() }}</div>
+    <div class="group text-centered">{{ stroke() }}</div>
 % endmacro
 
 % macro set_conc(conc=None)
@@ -52,9 +54,11 @@
     % endif
 % endmacro
 
+### index macros
+
 % macro render_shout_form(form)
     % if form is defined and form
-    <div class="units-row">
+    <div class="units-row end">
         <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">
             {{ form.csrf_token() }}
             <div class="input-groups width-100">
@@ -73,7 +77,7 @@
         $('#shout').on('keyup focusin', function()
         {
             len = $('#shout').val().length
-            if (len <= 5 || len >= 142)
+            if (len < 5 || len > 142)
             {
                 $('#counter').removeClass('fa-hand-o-right').addClass('fa-strikethrough');
             } else
@@ -87,5 +91,121 @@
             $('#counter').removeClass('fa-strikethrough').addClass('fa-hand-o-right').text('');
         });
     </script>
+    % endif
+% endmacro
+
+### api macros
+
+% macro render_hartmann_gitter()
+    <pre class="unit-75 unit-centered"><code>
+#!/bin/bash
+
+ERDSTRAHLEN=$(python3 -c "from random import choice; print(choice(range(0, 1+1337)))")
+
+% if caller
+{{ caller() }}
+% else
+echo $ERDSTRAHLEN
+
+% endif
+    </code></pre>
+% endmacro
+
+% macro render_endpoints(url, method, data=none)
+    <table class="table-flat table-hovered">
+        <tr>
+            <th class="width-40 text-left"><code>{{ url_for('api') }}/{{ url }}</code></th>
+            <th class="width-60 text-right">{{ method }}</th>
+        </tr>
+        % if data
+        % for (field, sample) in data
+            <tr>
+                <th class="width-40 text-left"><var>{{ field }}</var></th>
+                <td class="width-60 text-centered">{{ sample }}</td>
+            </tr>
+        % endfor
+        % endif
+    </table>
+% endmacro
+
+% macro render_curl_line(url, method, data=none, pre=false, ident='')
+{{ ident }}curl{{ ' -u "user:pass"' if method != 'GET' }} -X {{ method }} {{ url_for('api', _external=true) }}/{{ url }}{{ ' \\' if pre and data }}
+% if data
+% for (field, sample) in data
+{{ ident ~ '\t' }}-d {{ field }}={{ sample }}{{ ' \\' if pre and not loop.last }}
+% endfor
+% endif
+% endmacro
+
+% macro render_api_listing(elems)
+    <ul>
+        % for elem in elems
+        % with cliff = time_format(the_cliff()) + ' (' + reltime_format(the_cliff()) ~ ')'
+        % with del_cliff = time_format(the_del_cliff()) + ' (' + reltime_format(the_del_cliff()) ~ ')'
+        <li>{{
+            elem|replace(
+                'Unit', '<a class="bold" href="' ~ url_for('api', _anchor='unit') ~ '">Unit</a>'
+            )|replace(
+                'Axis', '<a class="bold" href="' ~ url_for('api', _anchor='axis') ~ '">Axis</a>'
+            )|replace(
+                'Sensor', '<a class="bold" href="' ~ url_for('api', _anchor='sensor') ~ '">Sensor</a>'
+            )|replace(
+                'Data', '<a class="bold" href="' ~ url_for('api', _anchor='data') ~ '">Data</a>'
+            )|replace(
+                'Collection', '<a class="bold" href="' ~ url_for('api', _anchor='collection') ~ '">Collection</a>'
+            )|replace(
+                'SpaceAPI', '<a class="bold" href="' ~ url_for('api', _anchor='spaceapi') ~ '">SpaceAPI</a>'
+            )|replace(
+                'Feed', '<a class="bold" href="' ~ url_for('atom_feed') ~ '">Feed</a>'
+            )|replace(
+                'Status', '<a href="' ~ url_for('conc', cc=0) ~ '">Status</a>'
+            )|replace(
+                'Graph', '<a href="' ~ url_for('index') ~ '">Graph</a>'
+            )|replace(
+                '__v', '<var>'
+            )|replace(
+                'v__', '</var>'
+            )|replace(
+                '__s', '<small>'
+            )|replace(
+                's__', '</small>'
+            )|replace(
+                '_' ~ the_shouts , '<a href="' ~ url_for('index', _anchor=the_shouts) ~ '">' ~ the_shouts ~ '</a>'
+            )|safe|replace(
+                '__cliff', cliff
+            )|replace(
+                '__dcliff', del_cliff
+            )|safe
+        }}</li>
+        % endwith
+        % endwith
+        % endfor
+    </ul>
+% endmacro
+
+% macro render_api_segment(name, endpoints)
+    <hr />
+    <h3 id="{{ name|lower }}"><a>{{ name }}</a></h3>
+    % if caller
+        {{ caller() }}
+    % endif
+    % if endpoints
+    <div class="units-row end">
+        <div class="unit-50">
+            <div class="text-centered"><span class="fa fa-eyedropper"></span></div>
+            % for (url, method, data, description) in endpoints
+                {{ render_endpoints(url, method, data) }}
+            % endfor
+        </div>
+        <div class="unit-50">
+            <div class="text-centered"><span class="fa fa-tint"></span></div>
+            % for (url, method, data, description) in endpoints
+                <div class="group pause">
+                    {{ description }}
+                    <code class="width-100">{{ render_curl_line(url, method, data) }}</code>
+                </div>
+            % endfor
+        </div>
+    </div>
     % endif
 % endmacro
