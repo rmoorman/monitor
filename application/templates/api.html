@@ -1,7 +1,7 @@
 % extends 'base.html'
 
 % block content
-    % from 'macros.html' import time_format, reltime_format, render_hartmann_gitter, render_curl_line, render_api_listing, render_api_segment
+    % from 'macros.html' import render_hartmann_gitter, render_curl_line, render_api_listing, render_api_segment
 
     <h2 class="text-centered">api</h2>
     Im vorliegendem Beispielfall haben wir eine Datenquelle, die kontinuierlich die Erdstrahlenbelastung vor Ort misst:
@@ -218,7 +218,7 @@ if [ $ERDSTRAHLEN -eq 1337 ]; then
 {{ render_curl_line(
     'data', 'POST', [
         ('sensor', '"' ~ the_shouts ~ '"'),
-        ('value', '"Erdstrahlen Overload! Sofort evakuieren!!1!"')
+        ('value', '"Erdstrahlen Overload! Sofort evakuieren!!1!einself!"')
     ],
     pre=true,
     ident='\t'

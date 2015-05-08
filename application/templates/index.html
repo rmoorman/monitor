@@ -6,6 +6,8 @@
     <script src="{{ url_for('static', filename='js/jquery.flot.resize.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery.flot.time.min.js') }}"></script>
     <script>
+    $(function ()
+    {
         var anchor = $(location).attr('hash').replace('#', '');
         var graph_timer;
         var cycle_timer;
@@ -161,13 +163,13 @@
                         )
                     );
 
-                    if (anchor == collection || i == draw_num)
+                    if (anchor.indexOf(collection) == 0 || i == draw_num)
                     {
                         draw_graph(collection);
                     }
                 });
 
-                if(anchor == 'cycle')
+                if(anchor.indexOf('cycle') == 0)
                 {
                     clearInterval(cycle_timer);
                     cycle_timer = setInterval(function() {
@@ -182,6 +184,8 @@
         }
 
         run_graph();
+
+    });
     </script>
     <style>
         #plot
@@ -217,34 +221,17 @@
                         {
                             class: 'unit-33',
                             id: '{{ the_shouts }}_' + shout.time
-                        }).on('click', function (cl)
-                        {
-                            $('#delete_'+i).addClass('fa fa-trash-o');
                         }).append(
                             $('<a/>',
                             {
-                                class: 'left error',
-                                id: 'delete_'+i,
-                                title: 'delete'
-                            }).on('click', function (cl)
-                            {
-                                api_query('{{ url_for('api') }}/data/{{ the_shouts }}', run_shouts, 'DELETE',
-                                {
-                                    time: shout.time,
-                                    value: shout.value
-                                }, function(ex, err, eex)
-                                {
-                                    $('#toggle_'+i).addClass('error');
-                                    $('#toggle_'+i).text(err + ' - ' + eex);
-                                    $('#delete_'+i).removeClass('fa fa-trash-o');
-                                });
+                                class: 'left fa ' + shout.value.match(/fa-\S+/)
                             })
                         ).append(
                             $('<blockquote/>',
                             {
                                 class: 'end',
                                 style: 'word-wrap: break-word;',
-                                text: shout.value
+                                text: shout.value.replace(shout.value.match(/fa-\S+/), ' ')
                             })
                         ).append(
                             $('<cite/>',
@@ -272,23 +259,20 @@
     </script>
 % endblock header
 
-
 % block content
     % from 'macros.html' import render_shout_form
-    <div class="units-row end">
-        <nav class="nav-tabs hide" id="sources">
-            <ul id="source_elems"></ul>
-        </nav>
-        <div class="unit-100 hide" id="plot"></div>
-        <div class="unit-100 hide" id="legend">
-            <div id="legend_elems"></div>
-            <span class="hide" id="legend_phony"></span>
-        </div>
+    <nav class="nav-tabs hide" id="sources">
+        <ul id="source_elems"></ul>
+    </nav>
+    <div class="width-100 hide" id="plot"></div>
+    <nav class="nav fullwidth small end hide" id="navigation">
+        <ul id="navigation_elems"></ul>
+    </nav>
+    <div class="width-100 hide" id="legend">
+        <div id="legend_elems"></div>
+        <span class="hide" id="legend_phony"></span>
     </div>
 
-    <div class="units-row end">
-        <div class="unit-100 hide" id="{{ the_shouts }}"><a>{{ the_shouts }}</a></div>
-    </div>
-
+    <div class="width-100 hide" id="{{ the_shouts }}"><a>{{ the_shouts }}</a></div>
     {{ render_shout_form(shout_form) }}
 % endblock content

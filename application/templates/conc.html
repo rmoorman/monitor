@@ -2,6 +2,8 @@
 
 % block header
     <script>
+    $(function ()
+    {
         var anchor = $(location).attr('hash').replace('#', '');
 
         function render_table()
@@ -370,22 +372,21 @@
         }
 
         run_table();
+    });
     </script>
 % endblock header
 
 % block content
-    <div class="units-row end">
-        <div class="width-100 hide" id="collections">
-            <nav class="nav-tabs">
-                <ul id="collection_elems"></ul>
-            </nav>
-            <div id="collection_descr"></div>
-        </div>
-        <div class="width-100 hide" id="sensors">
-            <div id="sensor_elems"></div>
-        </div>
-        <div class="width-100 hide" id="units">
-            <div id="unit_elems"></div>
-        </div>
+    <div class="width-100 hide" id="collections">
+        <nav class="nav-tabs">
+            <ul id="collection_elems"></ul>
+        </nav>
+        <div id="collection_descr"></div>
+    </div>
+    <div class="width-100 hide" id="sensors">
+        <div id="sensor_elems"></div>
+    </div>
+    <div class="width-100 hide" id="units">
+        <div id="unit_elems"></div>
     </div>
 % endblock content

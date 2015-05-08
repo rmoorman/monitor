@@ -3,7 +3,7 @@ from flask.ext.restful.reqparse import RequestParser
 
 from application import api, db
 from application.auth import requires_auth
-from application.conc import short_conclusions
+from application.conc import jump_to_conclusions
 from application.models import Collection, Data, Sensor, Unit
 from application.service import (
     get_shouts,
@@ -62,7 +62,7 @@ class AxisHandler(Resource):
 
 class ConcHandler(Resource):
     def get(self, cc=0.0):
-        conclusions = short_conclusions()
+        conclusions = jump_to_conclusions()
         if cc and cc != conclusions:
             handle_variation(cc, conclusions)
         return conclusions

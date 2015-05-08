@@ -2,7 +2,7 @@ from random import choice
 from flask import url_for
 
 from application import app
-from application.conc import short_conclusions
+from application.conc import jump_to_conclusions
 from application.models import Data, Sensor
 from application.service import get_shouts
 from config import _jread
@@ -36,7 +36,7 @@ def spaceapi():
                 res.update({'value': not val})
             return res
 
-    conclusions = short_conclusions()
+    conclusions = jump_to_conclusions()
     shouts = get_shouts()
 
     space_is_open = True if conclusions >= 100 else False

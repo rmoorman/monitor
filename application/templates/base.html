@@ -49,19 +49,23 @@
         function api_query (endpoint, callb, method, data, errorcallb)
         {
             method = (method ? method : 'GET');
-            $('#loader').removeClass('hide');
-            function cb (cd)
+            $('#loader').html(
+                $('<i/>', {
+                    class: 'fa fa-minus'
+                })
+            ).removeClass('hide').fadeIn('fast');
+            function scb (cdt)
             {
-                if (cd !== null && cd !== undefined)
+                if (cdt !== null && cdt !== undefined)
                 {
-                    $('#loader').addClass('hide');
-                    return callb(cd)
+                    $('#loader').fadeOut('fast').addClass('hide');
+                    return callb(cdt)
                 }
             }
             function ecb (ex, err, exp)
             {
                 $('#loader').text(exp);
-                $('#loader').removeClass('hide');
+                $('#loader').removeClass('hide').fadeIn('fast');
             }
 
             $.ajax({
@@ -69,15 +73,17 @@
                 type: method,
                 data: data,
                 error: (errorcallb ? errorcallb : ecb),
-                success: cb
+                success: scb
             });
         }
+
+    $(function ()
+    {
 
         setInterval(function()
         {
             $('.time').text(time_fmt(new Date()));
         }, 250)
-
 
         % call(hurl, guess) set_conc(conclusions)
         var conc_timer;
@@ -117,6 +123,7 @@
 
         run_conc();
         % endcall
+    });
     </script>
     % block header
     % endblock header

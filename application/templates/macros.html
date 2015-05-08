@@ -9,22 +9,13 @@
 % endmacro
 
 % macro set_conc(conc=None)
-    % with guess = conc[0] if conc else range(0, 100)|random
+    % with guess = conc if conc else range(0, 100)|random
         % if caller
             {{ caller(url_for('conc', cc=guess), guess) }}
         % else
             <span class="conc"><a href="{{ url_for('conc', cc=guess) }}">{{ guess }}%</a></span>
         % endif
     % endwith
-% endmacro
-
-% macro byte_format(bt)
-    % if bt
-    <span class="byte_{{ bt }}">{{ bt }}</span>
-    <script>
-        $('.byte_{{ bt }}').text(byte_fmt({{ bt }}));
-    </script>
-    % endif
 % endmacro
 
 % macro time_format(ms)
@@ -45,20 +36,10 @@
     % endif
 % endmacro
 
-% macro uptime_format(ms)
-    % if ms
-    <span class="uptime_{{ ms }}">{{ ms }}</span>
-    <script>
-        $('.uptime_{{ ms }}').text(uptime_fmt({{ ms }}));
-    </script>
-    % endif
-% endmacro
-
 ### index macros
 
 % macro render_shout_form(form)
     % if form is defined and form
-    <div class="units-row end">
         <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">
             {{ form.csrf_token() }}
             <div class="input-groups width-100">
@@ -72,7 +53,6 @@
                 <span class="error">{{ error }}</span>
             % endfor
         </form>
-    </div>
     <script>
         $('#shout').on('keyup focusin', function()
         {
@@ -86,7 +66,7 @@
             }
             $('#counter').text(' ' + (len < 10 ? '0' + len: len));
         });
-        $('#shout').focusout(function()
+        $('#shout').on('focusout', function()
         {
             $('#counter').removeClass('fa-strikethrough').addClass('fa-hand-o-right').text('');
         });
