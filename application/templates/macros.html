@@ -36,44 +36,6 @@
     % endif
 % endmacro
 
-### index macros
-
-% macro render_shout_form(form)
-    % if form is defined and form
-        <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">
-            {{ form.csrf_token() }}
-            <div class="input-groups width-100">
-                <code id="counter" class="input-prepend fa fa-hand-o-right"></code>
-                {{ form.shout(placeholder='schreib was!') }}
-                <span class="btn-append">
-                    {{ form.save(class='btn') }}
-                </span>
-            </div>
-            % for error in form.errors.shout
-                <span class="error">{{ error }}</span>
-            % endfor
-        </form>
-    <script>
-        $('#shout').on('keyup focusin', function()
-        {
-            len = $('#shout').val().length
-            if (len < 5 || len > 142)
-            {
-                $('#counter').removeClass('fa-hand-o-right').addClass('fa-strikethrough');
-            } else
-            {
-                $('#counter').removeClass('fa-strikethrough').addClass('fa-hand-o-right');
-            }
-            $('#counter').text(' ' + (len < 10 ? '0' + len: len));
-        });
-        $('#shout').on('focusout', function()
-        {
-            $('#counter').removeClass('fa-strikethrough').addClass('fa-hand-o-right').text('');
-        });
-    </script>
-    % endif
-% endmacro
-
 ### api macros
 
 % macro render_hartmann_gitter()

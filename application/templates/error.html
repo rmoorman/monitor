@@ -2,13 +2,13 @@
 
 % block content
     % if error
-        <div class="group text-centered">
-            <h2>{{ error.code }}</h2>
-            <div class="unit-75 unit-centered tools-alert pause">
-                <div class="pause"><var>{{ request.url }}</var></div>
-                {{ error.description }}
-            </div>
-            <div class="light">sorry</div>
+    <div class="group text-centered">
+        <h2>{{ error.code }}</h2>
+        <div class="unit-75 unit-centered tools-alert pause">
+            <div class="pause"><var>{{ request.url }}</var></div>
+            {{ error.description }}
         </div>
+        <div class="light">sorry</div>
+    </div>
     % endif
 % endblock content

@@ -3,189 +3,12 @@
 % block header
     <script src="{{ url_for('static', filename='js/jquery.flot.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery.flot.crosshair.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.flot.navigate.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery.flot.resize.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/jquery.flot.time.min.js') }}"></script>
     <script>
-    $(function ()
-    {
-        var anchor = $(location).attr('hash').replace('#', '');
-        var graph_timer;
-        var cycle_timer;
-
-        function black_or_white (color)
-        {
-            var rgb = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-            return (0.2126 * rgb[1] + 0.7152 * rgb[2] + 0.0722 * rgb[3]) < 150 ? 'black' : 'white';
-        }
-
-        var plot;
-        var plot_data = {
-            crosshair: {
-                mode: 'x'
-            },
-            grid: {
-                hoverable: true,
-                clickable: true
-            },
-            legend: {
-                show: true,
-                container: $('#legend_phony'),
-                sorted: true,
-                labelFormatter: function (label, series)
-                {
-                    $('#legend_elems').append(
-                        $('<div/>',
-                        {
-                            class: 'width-100 label label-' + black_or_white(series.color),
-                            css: {'background-color': series.color},
-                            id: 'legend_elems_'+label,
-                            text: label
-                        })
-                    );
-                }
-            },
-            series: {
-                shadowSize: 0,
-                lines: {show: true},
-                points: {show: true}
-            },
-            xaxis: {
-                mode: 'time',
-                timeformat: '%d.%m - %H:%M',
-                timezone: 'browser',
-                tickFormatter: function (value, axis)
-                {
-                    return time_fmt(value);
-                }
-            },
-            yaxes: [
-                {}, // 1: numbers
-                {
-                    tickFormatter: function (value, axis)
-                    {
-                        return byte_fmt(value);
-                    }
-                }, // 2: bytes
-                {
-                    mode: "time",
-                    timezone: "browser",
-                    tickFormatter: function (value, axis)
-                    {
-                        return uptime_fmt(value);
-                    }
-                } // 3: seconds
-            ]
-        }
-
-        function run_graph()
-        {
-            function draw_graph(collection)
-            {
-                function draw_callback(data)
-                {
-                    $('#plot').resize(function ()
-                    {
-                        $('#legend_elems').text('');
-                    });
-                    $('#legend_elems').text('');
-
-                    $('#plot').removeClass('hide');
-                    $('#legend').removeClass('hide');
-
-                    $('#plot').on('plotclick plothover', function (event, pos, item)
-                    {
-                        if (pos !== undefined && pos !== null)
-                        {
-                            $.each(plot.getData(), function (i, dset)
-                            {
-                                var ptime = null;
-                                var label = null;
-                                var last = $(dset.data.filter(function(idx){ return idx[0] <= pos.x; })).first()[0];
-                                if (last !== undefined && last !== null)
-                                {
-                                    ptime = time_fmt(pos.x);
-                                    switch (dset.yaxis.n)
-                                    {
-                                        case 1: label = last[1] + ' [' + last[1] + ']'; break;
-                                        case 2: label = byte_fmt(last[1]) + ' [' + last[1] + ']'; break;
-                                        case 3: label = uptime_fmt(last[1]) + ' [' + last[1] + ']'; break;
-                                        default: break;
-                                    }
-                                    if (label !== undefined && label !== null)
-                                    {
-                                        $('#legend_elems_'+dset.label).text(dset.label + ' (' + label + ' - ' + ptime + ')');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    plot = $.plot('#plot', data, plot_data);
-                }
-
-                $('#source_elems_'+collection).parent().siblings().each(function (i, se)
-                {
-                    $(se).removeClass('active');
-                });
-                $('#source_elems_'+collection).parent().addClass('active');
-
-                clearInterval(graph_timer);
-                graph_timer = setInterval(function() {
-                    draw_graph(collection);
-                }, refresh_seconds());
-
-                api_query('{{ url_for('api') }}/graph/'+collection, draw_callback);
-            }
-
-            function graph_callback(collections)
-            {
-
-                $('#source_elems').text('');
-                $('#sources').removeClass('hide');
-
-                var draw_num = 0;
-
-                $.each(collections, function (i, collection)
-                {
-                    $('#source_elems').append(
-                        $('<li/>',
-                        {
-                            id: collection
-                        }).append(
-                            $('<a/>',
-                            {
-                                id: 'source_elems_'+collection,
-                                text: collection
-                            }).on('click', function (cl)
-                            {
-                                clearInterval(cycle_timer);
-                                draw_graph(collection);
-                            })
-                        )
-                    );
-
-                    if (anchor.indexOf(collection) == 0 || i == draw_num)
-                    {
-                        draw_graph(collection);
-                    }
-                });
-
-                if(anchor.indexOf('cycle') == 0)
-                {
-                    clearInterval(cycle_timer);
-                    cycle_timer = setInterval(function() {
-                        clearInterval(graph_timer);
-                        draw_num = (draw_num + 1 < collections.length ? draw_num + 1 : 0)
-                        draw_graph(collections[draw_num]);
-                    }, 2 * refresh_seconds());
-                }
-            }
-
-            api_query('{{ url_for('api') }}/graph', graph_callback)
-        }
-
-        run_graph();
-
-    });
+    % include 'graph.js'
+    % include 'shouts.js'
     </script>
     <style>
         #plot
@@ -193,74 +16,9 @@
             height: 250px;
         }
     </style>
-
-    <script>
-    $(function ()
-    {
-        var shout_timer;
-        var wdh = 3;
-
-        function run_shouts()
-        {
-            function shouts_callback(shouts)
-            {
-                $('#{{ the_shouts }}').text('');
-                $('#{{ the_shouts }}').removeClass('hide');
-
-                $.each(shouts, function (i, shout)
-                {
-                    var elem = (i - (i % wdh));
-                    var block = (
-                        (i % wdh) != 0 ? $('#block_'+elem) : $('<div/>',
-                        {
-                            id: 'block_'+elem,
-                            class: 'units-row end'
-                        })
-                    ).append(
-                        $('<div/>',
-                        {
-                            class: 'unit-33',
-                            id: '{{ the_shouts }}_' + shout.time
-                        }).append(
-                            $('<a/>',
-                            {
-                                class: 'left fa ' + shout.value.match(/fa-\S+/)
-                            })
-                        ).append(
-                            $('<blockquote/>',
-                            {
-                                class: 'end',
-                                style: 'word-wrap: break-word;',
-                                text: shout.value.replace(shout.value.match(/fa-\S+/), ' ')
-                            })
-                        ).append(
-                            $('<cite/>',
-                            {
-                                id: 'toggle_'+i,
-                                class: 'small left',
-                                text: reltime_fmt(shout.time)
-                            })
-                        )
-                    );
-
-                    $('#{{ the_shouts }}').append(block);
-                });
-            }
-
-            api_query('{{ url_for('api') }}/data/{{ the_shouts }}', shouts_callback);
-            clearInterval(shout_timer);
-            shout_timer = setInterval(function() {
-                run_shouts();
-            }, refresh_seconds());
-        }
-
-        run_shouts();
-    });
-    </script>
 % endblock header
 
 % block content
-    % from 'macros.html' import render_shout_form
     <nav class="nav-tabs hide" id="sources">
         <ul id="source_elems"></ul>
     </nav>
@@ -274,5 +32,19 @@
     </div>
 
     <div class="width-100 hide" id="{{ the_shouts }}"><a>{{ the_shouts }}</a></div>
-    {{ render_shout_form(shout_form) }}
+    % if shout_form is defined and shout_form
+    <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">
+        {{ shout_form.csrf_token() }}
+        <div class="input-groups width-100">
+            <code id="counter" class="input-prepend fa fa-hand-o-right"></code>
+            {{ shout_form.shout(placeholder='schreib was!') }}
+            <span class="btn-append">
+                {{ shout_form.save(class='btn') }}
+            </span>
+        </div>
+        % for error in shout_form.errors.shout
+            <span class="error">{{ error }}</span>
+        % endfor
+    </form>
+    % endif
 % endblock content
