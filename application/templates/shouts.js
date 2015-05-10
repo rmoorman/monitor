@@ -25,7 +25,7 @@ $(function ()
                         class: 'unit-33',
                         id: '{{ the_shouts }}_' + shout.time
                     }).append(
-                        $('<a/>',
+                        $('<i/>',
                         {
                             class: 'left fa ' + shout.value.match(/fa-\S+/)
                         })

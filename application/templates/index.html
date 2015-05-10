@@ -19,18 +19,19 @@
 % endblock header
 
 % block content
-    <nav class="nav-tabs hide" id="sources">
-        <ul id="source_elems"></ul>
-    </nav>
-    <div class="width-100 hide" id="plot"></div>
-    <nav class="nav fullwidth small end hide" id="navigation">
-        <ul id="navigation_elems"></ul>
-    </nav>
-    <div class="width-100 hide" id="legend">
-        <div id="legend_elems"></div>
-        <span class="hide" id="legend_phony"></span>
+    <div id="graph" class="width-100" tabindex="1">
+        <nav class="nav-tabs hide" id="sources">
+            <ul id="source_elems"></ul>
+        </nav>
+        <div class="width-100 hide" id="plot"></div>
+        <nav class="nav fullwidth small end hide" id="navigation">
+            <ul id="navigation_elems"></ul>
+        </nav>
+        <div class="width-100 hide" id="legend">
+            <div id="legend_elems"></div>
+            <span class="hide" id="legend_phony"></span>
+        </div>
     </div>
-
     <div class="width-100 hide" id="{{ the_shouts }}"><a>{{ the_shouts }}</a></div>
     % if shout_form is defined and shout_form
     <form action="{{ url_for('index') }}" method="post" class="forms unit-75 unit-centered">

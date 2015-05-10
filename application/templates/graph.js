@@ -126,11 +126,19 @@ $(function ()
                 {
                     clearInterval(graph_timer);
                     clearInterval(cycle_timer);
-                    (dim ?
-                        (ax ? plot.zoom() : plot.zoomOut())
-                    :
-                        plot.pan({left: (ax ? 60 : -60)})
-                    );
+                    if (dim)
+                    {
+                        if (ax)
+                        {
+                            plot.zoom();
+                        } else {
+                            plot.zoomOut();
+                        }
+                    } else
+                    {
+                        var left = (ax ? 60 : -60);
+                        plot.pan({left: left});
+                    }
                 }
 
                 function render_navigation (icon, dim, ax)
@@ -157,10 +165,8 @@ $(function ()
                 );
                 $('#navigation').removeClass('hide');
 
-                $(document).on('keypress', function(ke)
+                $('#graph').on('keypress', function(ke)
                 {
-                    console.log('ke.key');
-                    console.log(ke.key);
                     switch (ke.key)
                     {
                         case 'h': move_around(false, false); break;
@@ -173,7 +179,7 @@ $(function ()
                 });
             }
 
-            $(document).off('keypress');
+            $('#graph').off('keypress');
 
             $('#source_elems_'+collection).parent().siblings().each(function (i, se)
             {
