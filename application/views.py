@@ -37,7 +37,7 @@ def conc(cc=0.0):
 
     return render_template(
         'conc.html',
-        title='{}%'.format(conclusions),
+        title='status',
         conclusions=conclusions
     )
 

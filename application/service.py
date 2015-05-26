@@ -16,6 +16,7 @@ the_service_collection = 'service'
 the_shouts = 'shouts'
 the_variation = 'erdstrahlen'
 the_variation_unit = 'bovis'
+variation_enabled = app.config['VARIATION_ENABLED']
 
 app.jinja_env.line_statement_prefix = '%'
 app.jinja_env.line_comment_prefix = '###'
@@ -84,17 +85,18 @@ def get_variation():
         factor=0.0,
         sensor_description='Erdstrahlenerfassung im Hartmann-Gitter',
         unit_description='Erdstrahlenbelastung in Bovis',
-    )
+    ) if variation_enabled else None
 
 
 def handle_variation(given, expected):
-    sensor = get_variation()
-    variation = Data(
-        round(abs(given - expected), 2),
-        sensor
-    )
-    db.session.add(variation)
-    db.session.commit()
+    if variation_enabled:
+        sensor = get_variation()
+        variation = Data(
+            round(abs(given - expected), 2),
+            sensor
+        )
+        db.session.add(variation)
+        db.session.commit()
 
 
 app.jinja_env.globals.update(the_autoref_max=1000*app.config['AUTOREF_MAX'])

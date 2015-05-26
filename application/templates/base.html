@@ -14,52 +14,6 @@
     <script>moment.locale('de');</script>
     <script>
     % include 'base.js'
-    $(function ()
-    {
-        setInterval(function()
-        {
-            $('.time').text(time_fmt(new Date()));
-        }, 250)
-
-        % call(hurl, guess) set_conc(conclusions)
-        var conc_timer;
-        var guess = {{ guess }};
-        var title = $(document).prop('title');
-        % if conclusions and (conclusions[0] ~ '%') == title
-        title = title.replace('{{ conclusions[0] }}%', '%%%');
-        % endif
-
-        function run_conc()
-        {
-            function conc_callback(val)
-            {
-                $('.conc').html(
-                    $('<a/>',
-                    {
-                        href: '{{ hurl }}'.replace('{{ guess }}', val),
-                        text: val + '%'
-                    }).hover(function (hv)
-                    {
-                        $.progress.update(val);
-                    })
-                );
-
-                $.progress.hide();
-                $(document).prop('title', title.replace('%%%', val+'%').replace('monitor', val+'%'));
-                guess = val;
-            }
-
-            api_query(guess, conc_callback);
-            clearInterval(conc_timer);
-            conc_timer = setInterval(function()
-            {
-                run_conc();
-            }, refresh_seconds());
-        }
-
-        run_conc();
-        % endcall
-    });
     </script>
     % block header
     % endblock header

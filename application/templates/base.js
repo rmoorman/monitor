@@ -62,3 +62,47 @@ function api_query(endpoint, callb, method, data, errorcallb)
     });
 }
 
+$(function ()
+{
+    setInterval(function()
+    {
+        $('.time').text(time_fmt(new Date()));
+    }, 250);
+
+
+    var conc_timer;
+    var cvalue = 0;
+    var title = $(document).prop('title');
+
+    function run_conc()
+    {
+        function conc_callback(value)
+        {
+            $('.conc').html(
+                $('<a/>',
+                {
+                    href: '/' + value,
+                    text: value + '%'
+                }).hover(function (hv)
+                {
+                    $.progress.update(value);
+                })
+            );
+
+            $.progress.hide();
+            $(document).prop('title', title.replace('monitor', value+'%').replace('monitor', value+'%'));
+
+            cvalue = value;
+        }
+
+        api_query(cvalue, conc_callback);
+        clearInterval(conc_timer);
+        conc_timer = setInterval(function()
+        {
+            run_conc();
+        }, refresh_seconds());
+    }
+
+    run_conc();
+
+});

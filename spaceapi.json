@@ -1,6 +1,6 @@
 {
     "api": "0.13",
-    "space": "CommonGround",
+    "space": "cccmzwi",
     "logo":  "",
     "url": "https://www.cccmz.de/",
         "location": {
@@ -60,6 +60,10 @@
         "calendar": {
             "url": "https://www.cccmz.de/feed/my-calendar-ics",
             "type": "ical"
+        },
+        "wiki": {
+            "url": "https://fnord.cccmz.de/api.php?action=feedrecentchanges&feedformat=atom",
+            "type": "atom"
         }
     },
     "cache": {

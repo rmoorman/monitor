@@ -59,6 +59,8 @@ MAXCONC = 60 * 60 * 2
 AUTOREF_MIN = 30
 AUTOREF_MAX = 60
 
+VARIATION_ENABLED = True
+
 LOGOS = ['evil_man.png', 'jack_plug.png']
 SPACE_LOGO = 'cccmz_logo.png'
 SPACE_OPEN = 'space_open.png'
@@ -72,5 +74,6 @@ SPACE_SENSORS = {
 FOOTER_LINKS = {
     'monitor': 'https://github.com/spookey/monitor',
     'watcher': 'https://github.com/spookey/watcher',
-    'watcher_modules': 'https://github.com/spookey/watcher_modules'
+    'watcher_modules': 'https://github.com/spookey/watcher_modules',
+    '#yolonda': 'https://github.com/spookey/yolonda'
 }
