@@ -12,6 +12,15 @@ $(function ()
 
             $.each(shouts, function (i, shout)
             {
+                function urlify(text)
+                {
+                    var url_regex = /^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/i;
+                    return text.replace(url_regex, function(url)
+                    {
+                        return '<a href="' + url + '">' + url + '</a>';
+                    });
+                }
+
                 var elem = (i - (i % wdh));
                 var block = (
                     (i % wdh) !== 0 ? $('#block_'+elem) : $('<div/>',
@@ -34,8 +43,9 @@ $(function ()
                         {
                             class: 'end',
                             style: 'word-wrap: break-word;',
-                            text: shout.value.replace(/\s*fa-\S+/g, '.')
-                        })
+                        }).append(
+                            urlify(shout.value.replace(/\s*fa-\S+/g, '.'))
+                        )
                     ).append(
                         $('<cite/>',
                         {
