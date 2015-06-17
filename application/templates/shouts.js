@@ -34,7 +34,7 @@ $(function ()
                         {
                             class: 'end',
                             style: 'word-wrap: break-word;',
-                            text: shout.value.replace(/fa-\S+/g, '.')
+                            text: shout.value.replace(/\s*fa-\S+/g, '.')
                         })
                     ).append(
                         $('<cite/>',
