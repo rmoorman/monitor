@@ -23,7 +23,7 @@ def spaceapi():
     def _sensor_elem(apisens, sensor):
         last = sensor.get_data().first()
         if last:
-            val = last.num(fallback=False)
+            val = last.num()
             res = {
                 'description': sensor.description,
                 'location': sensor.description,
